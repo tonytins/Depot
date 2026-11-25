@@ -1,5 +1,5 @@
 {
-  "originHash" : "36172e1d96db2305a1a11dd536306bcd18a9786eb56ca2a699b48e3d8adb0679",
+  "originHash" : "1c0caadf8da1cdd99967b30df2bc68c6554fa5fd0574543c7b9f269a4e1c6f0b",
   "pins" : [
     {
       "identity" : "raylib-swift",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "3fe725b204bf30913366a82203566ab316941f2e"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
       }
     },
     {
