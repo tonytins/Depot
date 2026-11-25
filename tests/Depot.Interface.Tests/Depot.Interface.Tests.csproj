@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Depot.Interface's tests: most came with the code from VentureOS's Venture.OS.Common.Tests, and Interface/Fixtures
-    holds VentureOS's copies of Hudini's examples, kept up with the spec where Hudini lags.
+    Depot.Interface's tests: most came with the code from VentureOS's Venture.OS.Common.Tests. They read Hudini's
+    examples from tests/Fixtures, which depot-render's tests share, beside them as Interface/Fixtures/Hudini.
   -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Interface/Fixtures/**/*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../Fixtures/**/*" LinkBase="Interface/Fixtures/Hudini" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

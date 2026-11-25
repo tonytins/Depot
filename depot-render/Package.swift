@@ -1,15 +1,14 @@
 // swift-tools-version: 6.3
 
-// depot-render draws a UIScript document with Hudini, for Depot's canvas. It uses the Hudini checkout beside
-// VentureOS while Depot lives in VentureOS's depot.local/, and moves to Hudini's main branch before Depot leaves.
+// depot-render draws a UIScript document with Hudini, for Depot's canvas. It follows Hudini's main branch, which has
+// the depot and depotLight themes it draws in.
 
 import PackageDescription
 
 let package = Package(
     name: "depot-render",
     dependencies: [
-        // The name keeps the product references below working whatever the checkout's folder is called.
-        .package(name: "Hudini", path: "../../../Hudini"),
+        .package(url: "https://github.com/tonytins/Hudini", branch: "main"),
         .package(url: "https://github.com/tonytins/raylib-swift", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.5.0"),
     ],

@@ -76,8 +76,8 @@ What it can't show yet:
 
 ## Building
 
-Depot needs the .NET 10 SDK; `depot-render` needs Swift 6.3 and a Hudini checkout at `../../../Hudini`, beside
-VentureOS, along with raylib's native development libraries.
+Depot needs the .NET 10 SDK; `depot-render` needs Swift 6.3 and raylib's native development libraries, and builds
+against Hudini's `main` branch.
 
 ```sh
 dotnet build Depot.slnx
@@ -86,7 +86,7 @@ dotnet test --project tests/Depot.Tests
 (cd depot-render && swift build && swift test)
 ```
 
-`depot-render`'s tests read Hudini's demo documents from the same checkout. One of Depot's tests draws with
+Both test suites read Hudini's example documents from `tests/Fixtures`. One of Depot's tests draws with
 `depot-render` and is skipped when it isn't built or there's no display; run it on a virtual one with
 `DISPLAY=:99 dotnet test --project tests/Depot.Tests` while Xvfb serves `:99`.
 

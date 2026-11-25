@@ -6,10 +6,10 @@ import Foundation
 import Hudini
 import Testing
 
-/// Hudini's demo documents, from the checkout depot-render builds against.
+/// Hudini's example documents, in tests/Fixtures, which Depot.Interface's tests read too.
 private let examples = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()
-    .appendingPathComponent("../../../../../Hudini/Demo/Sources/hudini-demo/Resources")
+    .appendingPathComponent("../../../tests/Fixtures")
     .standardizedFileURL
 
 private func exampleDocuments() throws -> [URL] {

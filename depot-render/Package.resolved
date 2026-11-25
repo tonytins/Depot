@@ -1,6 +1,15 @@
 {
-  "originHash" : "1c0caadf8da1cdd99967b30df2bc68c6554fa5fd0574543c7b9f269a4e1c6f0b",
+  "originHash" : "f2d270082bbc56c63822934f967eddeaf6033dc0513fedc21dea3233b1932ae7",
   "pins" : [
+    {
+      "identity" : "hudini",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tonytins/Hudini",
+      "state" : {
+        "branch" : "main",
+        "revision" : "37aa4d31e1fc0184ee8208d80db0a10361e913b7"
+      }
+    },
     {
       "identity" : "raylib-swift",
       "kind" : "remoteSourceControl",
