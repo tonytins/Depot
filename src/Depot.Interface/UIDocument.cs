@@ -5,12 +5,12 @@ namespace Depot.Interface;
 
 /// <summary>
 /// A <c>.uix</c> document as an editor holds it: its exact text, where each element and attribute sits in that text,
-/// and what VentureOS reads from it. Edits change the text in place, so everything else in the file (comments,
+/// and what Hudini reads from it, the part of UIScript in <see cref="HudiniSubset"/>. Edits change the text in place, so everything else in the file (comments,
 /// spacing, attribute order, quotes, and entities) stays as it was written, and a document nobody edited is written
 /// back byte for byte.
 /// </summary>
 /// <remarks>
-/// A document VentureOS refuses still opens, so its text can be fixed, but it can only be edited as text:
+/// A document Hudini refuses still opens, so its text can be fixed, but it can only be edited as text:
 /// <see cref="Problem"/> says why, and <see cref="IsEditable"/> is <see langword="false"/>.
 /// </remarks>
 public sealed class UIDocument
@@ -39,19 +39,19 @@ public sealed class UIDocument
     /// </summary>
     public FlatXmlDocument? Xml { get; }
 
-    /// <summary>What VentureOS reads from the document, or <see langword="null"/> when it refuses it.</summary>
+    /// <summary>What Hudini reads from the document, or <see langword="null"/> when it refuses it.</summary>
     public UIScript? Script { get; }
 
-    /// <summary>Why VentureOS refuses the document, with the line, or <see langword="null"/> when it reads it.</summary>
+    /// <summary>Why Hudini refuses the document, with the line, or <see langword="null"/> when it reads it.</summary>
     public UIScriptException? Problem { get; }
 
     /// <summary>
-    /// Whether the document can be edited other than as text: only one VentureOS reads, so an edit never starts from
-    /// a document VentureOS would refuse, such as one with an element it doesn't know.
+    /// Whether the document can be edited other than as text: only one Hudini reads, so an edit never starts from
+    /// a document Hudini would refuse, such as one with a menu.
     /// </summary>
     public bool IsEditable => Script is not null;
 
-    /// <summary>Reads a document from its text. Text VentureOS refuses still gives a document, with its <see cref="Problem"/>.</summary>
+    /// <summary>Reads a document from its text. Text Hudini refuses still gives a document, with its <see cref="Problem"/>.</summary>
     public static UIDocument Read(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
@@ -68,6 +68,7 @@ public sealed class UIDocument
 
         try
         {
+            HudiniSubset.Check(xml);
             return new UIDocument(text, xml, UIScript.Build(xml), null);
         }
         catch (UIScriptException exception)
@@ -113,7 +114,7 @@ public sealed class UIDocument
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element.</exception>
     /// <exception cref="ArgumentException"><paramref name="name"/> isn't an attribute name.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as a width that isn't a number.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as a width that isn't a number.</exception>
     public UIDocument SetAttribute(int element, string name, string value) =>
         Finish(FlatXmlEditor.SetAttribute(Text, Editable(), element, name, value));
 
@@ -126,7 +127,7 @@ public sealed class UIDocument
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element.</exception>
     /// <exception cref="ArgumentException"><paramref name="name"/> isn't an attribute name.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as a window without a width.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as a window without a width.</exception>
     public UIDocument RemoveAttribute(int element, string name) =>
         Finish(FlatXmlEditor.RemoveAttribute(Text, Editable(), element, name));
 
@@ -146,7 +147,7 @@ public sealed class UIDocument
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such parent, or <paramref name="index"/> isn't a place inside it.</exception>
     /// <exception cref="ArgumentException">A name isn't one, or an attribute is given twice.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as a second window.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as a second window.</exception>
     public UIDocument InsertElement(int index, string name, IReadOnlyList<KeyValuePair<string, string>> attributes, int parent = Root) =>
         Finish(FlatXmlEditor.InsertElement(Text, Editable(), index, name, attributes, parent));
 
@@ -157,7 +158,7 @@ public sealed class UIDocument
     /// <returns>The edited document; this one is unchanged.</returns>
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as one without its window.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as one without its window.</exception>
     public UIDocument RemoveElement(int index) => Finish(FlatXmlEditor.RemoveElement(Text, Editable(), index));
 
     /// <summary>
@@ -169,7 +170,7 @@ public sealed class UIDocument
     /// <returns>The edited document; this one is unchanged, and it's returned as is when the element doesn't move.</returns>
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element, or the two aren't inside the same parent.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result.</exception>
     public UIDocument MoveElement(int from, int to) => Finish(FlatXmlEditor.MoveElement(Text, Editable(), from, to));
 
     /// <summary>
@@ -180,7 +181,7 @@ public sealed class UIDocument
     /// <returns>The edited document, and the element's index in it; this one is unchanged.</returns>
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element or parent, or the parent is inside the element.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as a pane inside a pane.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as a pane inside a pane.</exception>
     public (UIDocument Document, int Element) MoveInto(int element, int parent)
     {
         var xml = Editable();
@@ -214,7 +215,7 @@ public sealed class UIDocument
     /// <returns>The edited document, and the element's index in it; this one is unchanged.</returns>
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
     /// <exception cref="ArgumentOutOfRangeException">There's no such element, or it's directly inside the root.</exception>
-    /// <exception cref="UIScriptException">VentureOS would refuse the result, such as a menu item outside any menu.</exception>
+    /// <exception cref="UIScriptException">Hudini would refuse the result, such as a menu item outside any menu.</exception>
     public (UIDocument Document, int Element) MoveOut(int element)
     {
         var (text, moved) = FlatXmlEditor.MoveOut(Text, Editable(), element);
@@ -231,7 +232,7 @@ public sealed class UIDocument
     }
 
     /// <summary>
-    /// Reads edited text as VentureOS would, refusing what it refuses; text the edit left as it was gives this
+    /// Reads edited text as Hudini would, refusing what it refuses; text the edit left as it was gives this
     /// document back.
     /// </summary>
     private UIDocument Finish(string text)
