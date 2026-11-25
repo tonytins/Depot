@@ -2,8 +2,70 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Depot.App"
              RequestedThemeVariant="Default">
+  <!--
+    Depot wears the look it gives new documents, Hudini's depot and depotLight themes: slate and amber, softened
+    after Adwaita. The colors are the themes' own; change them together.
+  -->
+  <Application.Resources>
+    <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+    <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+  </Application.Resources>
   <Application.Styles>
-    <!-- Compact, as Roundhouse is. Depot's own look, the hybrid theme, replaces it later. -->
-    <FluentTheme DensityStyle="Compact"/>
+    <!-- Compact, as Roundhouse is: more of the document fits beside the canvas. -->
+    <FluentTheme DensityStyle="Compact">
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#F0BE5A"
+                               RegionColor="#1A1E26"
+                               AltHigh="#1A1E26"
+                               AltMediumHigh="#1A1E26"
+                               AltMedium="#12151B"
+                               AltMediumLow="#12151B"
+                               AltLow="#12151B"
+                               BaseHigh="#E4E8EE"
+                               BaseMediumHigh="#C2C6CC"
+                               BaseMedium="#8F939A"
+                               BaseMediumLow="#5A5E66"
+                               BaseLow="#42464E"
+                               ChromeMedium="#262B34"
+                               ChromeMediumLow="#262B34"
+                               ChromeLow="#1F232B"
+                               ChromeHigh="#42464E"
+                               ChromeAltLow="#E4E8EE"
+                               ListLow="#262B34"
+                               ListMedium="#3A4250"
+                               ErrorText="#E86A60"/>
+        <ColorPaletteResources x:Key="Light"
+                               Accent="#B07A0E"
+                               RegionColor="#FAFAFB"
+                               AltHigh="#FAFAFB"
+                               AltMediumHigh="#FAFAFB"
+                               AltMedium="#FFFFFF"
+                               AltMediumLow="#FFFFFF"
+                               AltLow="#FFFFFF"
+                               BaseHigh="#333338"
+                               BaseMediumHigh="#4F4F54"
+                               BaseMedium="#737376"
+                               BaseMediumLow="#A3A3A6"
+                               BaseLow="#D2D2D4"
+                               ChromeMedium="#FFFFFF"
+                               ChromeMediumLow="#FFFFFF"
+                               ChromeLow="#F2F2F3"
+                               ChromeHigh="#D2D2D4"
+                               ChromeAltLow="#333338"
+                               ListLow="#EBEBED"
+                               ListMedium="#DADADC"
+                               ErrorText="#C01C28"/>
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml"/>
+    <!-- The bars above and below the editor and canvas, a step from the window, as Hudini's title bar is. -->
+    <Style Selector="Border.bar">
+      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.problem">
+      <Setter Property="Foreground" Value="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+    </Style>
   </Application.Styles>
 </Application>

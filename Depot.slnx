@@ -3,7 +3,9 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path="README.md" />
+    <File Path="global.json" />
   </Folder>
   <Project Path="src/Depot/Depot.csproj" />
   <Project Path="src/Depot.Interface/Depot.Interface.csproj" />
+  <Project Path="tests/Depot.Tests/Depot.Tests.csproj" />
 </Solution>
