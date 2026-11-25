@@ -11,7 +11,10 @@ namespace Depot.Tests;
 /// </summary>
 public static class TestApp
 {
-    private static readonly HeadlessUnitTestSession Session = HeadlessUnitTestSession.StartNew(typeof(TestApp));
+    // One application for the whole run. The default, a new one for each test, races when xUnit runs test classes
+    // side by side: one test's setup can find the render loop another test's thread made.
+    private static readonly HeadlessUnitTestSession Session =
+        HeadlessUnitTestSession.StartNew(typeof(TestApp), AvaloniaTestIsolationLevel.PerAssembly);
 
     /// <summary>Avalonia finds the app here, as it does in Program.</summary>
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()

@@ -123,8 +123,9 @@ public sealed class MainWindowTests : IDisposable
         Assert.Equal(["Depot", "Depot Light", "Hudini Standard"], window.Get<ComboBox>("LookPicker").ItemsSource!.Cast<string>());
     });
 
+    // On Avalonia's thread like the rest: touching MainWindow runs Window's static setup, which must happen there.
     [Fact]
-    public void TheStatusBarSaysWhatHudiniLeftOut()
+    public void TheStatusBarSaysWhatHudiniLeftOut() => TestApp.Run(() =>
     {
         FrameMap frames = new("window", 200, 130, new FrameRect(0, 30, 200, 100), [], ["art"], ["s1", "s2"], ["Button.sparkle (line 3)"], []);
 
@@ -134,7 +135,7 @@ public sealed class MainWindowTests : IDisposable
         Assert.Contains("Images not found, outlined in red: art.", said);
         Assert.Contains("2 strings show their table and index", said);
         Assert.Equal("200 × 130, as Hudini draws it.", MainWindow.Describe(frames with { MissingImages = [], MissingStrings = [], IgnoredAttributes = [] }, null));
-    }
+    });
 
     // With depot-render built and a display to draw on, the whole way round: the text drawn, a typo reported, and
     // the picture back once it's fixed.
