@@ -1,6 +1,6 @@
 # Depot
 
-Depot is a designer for the [UIScript](https://github.com/tonytins/VentureOS/blob/main/docs/uiscript/README.md)
+Depot (a working title) is a designer for the [UIScript](https://github.com/tonytins/VentureOS/blob/main/docs/uiscript/README.md)
 documents that [Hudini](https://github.com/tonytins/Hudini)'s games read. It's a spin-off of Roundhouse,
 VentureOS's IDE, and draws its canvas with Hudini itself, so what you design is what the game draws.
 
@@ -45,34 +45,20 @@ the newer of `depot-render/.build/release` and `depot-render/.build/debug` in th
 - `src/Depot.Interface`: Depot's own copy of the UIScript reader and the document model it edits through, taken
   from VentureOS's `Venture.OS.Interface`, held to Hudini's subset (`HudiniSubset`).
 - `depot-render`: a Swift package that draws a document with Hudini, for the canvas.
+- `tests`: the tests for both .NET projects, and `tests/Fixtures`, Hudini's example documents, which every suite
+  reads; `depot-render`'s tests are in its package.
 
 ## depot-render
 
-`depot-render` draws a UIScript (`.uix`) or Maxis `.uis` document with Hudini, writes the picture as a PNG, and
-prints where Hudini placed each visual and control as JSON, so an editor can select what the picture shows.
+`depot-render` draws a UIScript or `.uis` document with Hudini, writes the picture as a PNG, and prints where Hudini
+placed each visual and control as JSON. Depot keeps it running with `--serve`, and other programs can use it too.
 
 ```sh
 depot-render budget.uix --output budget.png                       # in the depot look
 depot-render budget.uix --output budget.png --theme depot-light   # or standard, Hudini's own
 ```
 
-With `--serve`, it keeps its window open and reads one JSON request per line from standard input, answering each
-with one line, `{"frames": {...}}` or `{"error": "..."}`. A request names a document by `path`, or carries its
-text in `document`:
-
-```json
-{"document": "<UIScript version=\"1\">...</UIScript>", "theme": "depot", "output": "/tmp/canvas.png"}
-```
-
-It also takes `format` (`uix` or `uis`), `title` (for a window's bar), and `directory` (where image paths start).
-
-What it can't show yet:
-
-- Text is in raylib's default font; a game loads its own.
-- String references show their table and index, as Hudini shows a string its host can't find.
-- Image paths are read as files relative to the document. Images that aren't found are outlined in red.
-- It needs a display, even though its window stays hidden. Without a desktop, use Xvfb.
-- Rounded corners are drawn without antialiasing, which a game can turn on.
+Its options, protocol, and limits are in [its reference](docs/depot-render.md).
 
 ## Building
 
@@ -89,6 +75,13 @@ dotnet test --project tests/Depot.Tests
 Both test suites read Hudini's example documents from `tests/Fixtures`. One of Depot's tests draws with
 `depot-render` and is skipped when it isn't built or there's no display; run it on a virtual one with
 `DISPLAY=:99 dotnet test --project tests/Depot.Tests` while Xvfb serves `:99`.
+
+## Documentation
+
+- [docs/design.md](docs/design.md): how Depot is built, what it leaves out, and the decisions behind it.
+- [docs/depot-render.md](docs/depot-render.md): `depot-render`'s command line, protocol, and frame map.
+- [docs/hig.md](docs/hig.md): Depot's look, and where it differs from the VentureOS HIG.
+- [AGENTS.md](AGENTS.md) and [REVIEW.md](REVIEW.md): how to work on Depot, and how changes are reviewed.
 
 ## License
 
