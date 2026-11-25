@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/Depot/Depot.csproj" />
+  <Project Path="src/Depot.Interface/Depot.Interface.csproj" />
+</Solution>

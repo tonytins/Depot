@@ -1,0 +1,9 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Depot.App"
+             RequestedThemeVariant="Default">
+  <Application.Styles>
+    <!-- Compact, as Roundhouse is. Depot's own look, the hybrid theme, replaces it later. -->
+    <FluentTheme DensityStyle="Compact"/>
+  </Application.Styles>
+</Application>

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Depot's own copy of the formats its documents are written in: UIScript (.uix), the flat XML it's read through,
+    and CST string tables. Copied from VentureOS's Venture.OS.Interface at 2f5407b (2026-11-25), renamed into
+    Depot's namespace, and free to evolve from there. The UIScript spec keeps the format in step, and the VentureOS
+    HIG the look; nothing in code ties the two copies together. It still reads the whole spec, as VentureOS's
+    does, until it's narrowed to the subset Hudini reads.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Depot.Interface</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The CST specification's reader, the owner's own package. -->
+    <PackageReference Include="CSTNet" Version="2.1.200" />
+  </ItemGroup>
+
+</Project>

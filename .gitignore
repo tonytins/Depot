@@ -1,0 +1,12 @@
+# .NET build results
+bin/
+obj/
+TestResults/
+*.user
+
+# SwiftPM
+.build/
+.swiftpm/
+
+# Personal and machine-specific files
+*.local
