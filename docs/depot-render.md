@@ -11,7 +11,7 @@ on a virtual display such as Xvfb.
 ## Drawing one document
 
 ```sh
-depot-render <document> --output <file.png> [--theme depot|depot-light|standard] [--title <text>] [--format uix|uis] [--appearance <file>]
+depot-render <document> --output <file.png> [--theme depot|depot-light|standard] [--title <text>] [--format uix|uis] [--appearance <file>] [--tab <name>] [--pane <name>]
 ```
 
 | Option | What it does |
@@ -22,6 +22,8 @@ depot-render <document> --output <file.png> [--theme depot|depot-light|standard]
 | `--title` | The title a window's bar shows. Defaults to the document's file name. |
 | `--format` | How the document is written. Defaults to `uis` for a `.uis` file, and `uix` for anything else. |
 | `--appearance` | A Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances) the document is read with, as a game reads its windows: its images, styles, and fonts, which the document may name without declaring, and its scroll bar art. A `.uis` file is read without it. |
+| `--tab` | The tab to show, by name: its toolbar item shows held down, and only its controls and visuals, and those in no tab, are drawn. Defaults to the document's first. |
+| `--pane` | The pane to show, by name, as `--tab` is. Defaults to the document's first. |
 
 It prints the [frame map](#the-frame-map) on standard output, and anything wrong on standard error.
 
@@ -29,7 +31,7 @@ It prints the [frame map](#the-frame-map) on standard output, and anything wrong
 | --- | --- |
 | 0 | Drawn. |
 | 1 | It couldn't draw: the document or the appearance couldn't be read or Hudini refuses it, its size can't be drawn, the PNG couldn't be written, or there's no display. |
-| 64 | The command line doesn't make sense, such as no document or no `--output`. |
+| 64 | The command line doesn't make sense, such as no document, no `--output`, or `--serve` with a document, `--tab`, or `--pane`. |
 
 ## Serving requests
 
@@ -52,6 +54,8 @@ A request is an object with these fields:
 | `title` | The title a window's bar shows. Defaults to the file name, or nothing. |
 | `directory` | The folder image paths start from. Defaults to the document's folder. |
 | `appearance` | A Hudini appearance file the document is read with, as `--appearance` is. |
+| `tab` | The tab to show, as `--tab` is. A tab the document doesn't have is an error. |
+| `pane` | The pane to show, as `--pane` is. A pane the document doesn't have is an error. |
 | `output` | Where to write the PNG. Required. |
 
 ```json
@@ -64,7 +68,8 @@ that fails is answered with its error, and the next line is read as usual. Blank
 ## The frame map
 
 Positions are in the picture's pixels, from its top-left corner. A window's picture includes the 30-pixel title bar
-Hudini's `WindowFrame` draws, so its controls sit below it.
+Hudini's `WindowFrame` draws, so its controls sit below it, and its sidebar, if it has one, so they sit beside that
+too.
 
 ```json
 {
@@ -86,8 +91,11 @@ Hudini's `WindowFrame` draws, so its controls sit below it.
 | --- | --- |
 | `kind` | `window` for a `<Window>`, drawn in a `WindowFrame`; `panel` for a `<Panel>`, drawn on a plain fill. |
 | `width`, `height` | The picture's size. |
-| `content` | Where the document's own content is: below the title bar, or all of a panel. |
-| `elements` | The visuals, then the controls, in the order Hudini draws them, so later ones are in front. `element` is the element's name in the document, such as `Button` or `Visual`; `hidden` is set for one that starts hidden, which only a `.uis` file has, and the picture doesn't show. |
+| `content` | Where the document's own content is: below the title bar and beside the sidebar, or all of a panel. |
+| `sidebar` | Where the sidebar is, for a window with one; absent otherwise. Hudini draws it on the left, whatever its `edge`. |
+| `tab` | The tab shown, for a document with tabs; absent otherwise. |
+| `pane` | The pane shown, for a document with a sidebar of panes; absent otherwise. |
+| `elements` | The visuals, then the controls, in the order Hudini draws them, so later ones are in front. `element` is the element's name in the document, such as `Button` or `Visual`; `hidden` is set for one the picture doesn't show: one in a tab or pane that isn't shown, or one that starts hidden, which only a `.uis` file has. |
 | `missingImages` | Images the document names that couldn't be loaded, which Hudini outlines in red. |
 | `missingStrings` | Strings the document names, which `depot-render` can't look up yet. |
 | `ignoredAttributes` | Attributes Hudini didn't recognize, as `element.attribute (line n)`. |

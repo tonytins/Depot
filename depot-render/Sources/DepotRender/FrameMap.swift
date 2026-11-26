@@ -3,8 +3,8 @@ import Raylib
 
 /// Where Hudini places everything a document draws, so Depot can select and move what it shows.
 ///
-/// Positions are in the picture's pixels, from its top-left corner. A window's picture includes the title bar
-/// Hudini's `WindowFrame` draws, so its controls sit below it.
+/// Positions are in the picture's pixels, from its top-left corner. A window's picture includes the title bar and
+/// sidebar Hudini's `WindowFrame` draws, so its controls sit below the one and beside the other.
 public struct FrameMap: Codable, Sendable, Equatable {
     /// The largest side of a picture, in pixels.
     public static let maximumSide: Float = 8192
@@ -40,7 +40,7 @@ public struct FrameMap: Codable, Sendable, Equatable {
         public var element: String
         /// Where Hudini draws it.
         public var frame: Rect
-        /// Whether it starts hidden, so the picture doesn't show it.
+        /// Whether the picture doesn't show it: it starts hidden, or it's in a tab or pane that isn't shown.
         public var hidden: Bool
     }
 
@@ -48,8 +48,15 @@ public struct FrameMap: Codable, Sendable, Equatable {
     /// The picture's size.
     public var width: Float
     public var height: Float
-    /// The area the document's own content is drawn in: below the title bar for a window, everything for a panel.
+    /// The area the document's own content is drawn in: below the title bar and beside the sidebar for a window,
+    /// everything for a panel.
     public var content: Rect
+    /// Where the sidebar is drawn, for a window with one.
+    public var sidebar: Rect?
+    /// The tab shown, for a document with tabs.
+    public var tab: String?
+    /// The pane shown, for a document with a sidebar of panes, unless none is.
+    public var pane: String?
     /// The visuals, then the controls, in the order they're drawn.
     public var elements: [Element]
     /// Images the document names that couldn't be loaded, which Hudini outlines in red.
@@ -65,14 +72,27 @@ public struct FrameMap: Codable, Sendable, Equatable {
     public init(script: UIScript, view: UIView) throws {
         kind = script.panelEdge == nil ? .window : .panel
         let titleHeight = kind == .window ? Float(WindowFrame.titleHeight) : 0
-        width = view.windowSize.x
+        let sidebarWidth = kind == .window ? script.sidebar?.width ?? 0 : 0
+        width = view.windowSize.x + sidebarWidth
         height = view.windowSize.y + titleHeight
         guard (1...Self.maximumSide).contains(width), (1...Self.maximumSide).contains(height) else {
             throw RenderError.unsupportedSize(width: width, height: height)
         }
-        content = Rect(x: 0, y: titleHeight, width: width, height: view.windowSize.y)
+        // Where the view goes is Hudini's to say, so the map can't drift from what's drawn.
+        let area = kind == .window
+            ? WindowFrame(view: view).viewBounds(in: Rectangle(x: 0, y: 0, width: width, height: height))
+            : Rectangle(x: 0, y: 0, width: width, height: height)
+        content = Rect(x: area.x, y: area.y, width: area.width, height: area.height)
+        sidebar = sidebarWidth > 0 ? Rect(x: 0, y: titleHeight, width: sidebarWidth, height: view.windowSize.y) : nil
+        tab = view.selectedTab
+        pane = view.selectedPane
 
-        let origin = Vector2(x: 0, y: titleHeight)
+        // What the shown tab and pane leave out, as the spec says a host hides it.
+        let away = Set(
+            script.tabs.filter { $0.name != view.selectedTab }.flatMap(\.contents)
+                + (script.sidebar?.panes ?? []).filter { $0.name != view.selectedPane }.flatMap(\.contents)
+        )
+        let origin = Vector2(x: area.x, y: area.y)
         func element(_ name: String, _ tag: String) -> Element? {
             guard let bounds = view.bounds(named: name, at: origin) else {
                 return nil
@@ -81,7 +101,7 @@ public struct FrameMap: Codable, Sendable, Equatable {
                 name: name,
                 element: tag,
                 frame: Rect(x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height),
-                hidden: view.isHidden(named: name)
+                hidden: view.isHidden(named: name) || away.contains(name)
             )
         }
         elements = script.visuals.compactMap { element($0.name, "Visual") }

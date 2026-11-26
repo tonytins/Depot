@@ -70,6 +70,7 @@ public final class Renderer {
             },
             loadFont: loadFont
         )
+        resolved.show(in: view)
         let map = try FrameMap(script: resolved.script, view: view)
 
         let target = LoadRenderTexture(Int(map.width), Int(map.height))

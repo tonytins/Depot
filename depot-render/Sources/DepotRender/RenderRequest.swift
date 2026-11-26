@@ -21,6 +21,11 @@ public struct RenderRequest: Codable, Sendable, Equatable {
     /// A Hudini appearance file the document is read with, as a game reads its windows. Its image paths are relative
     /// to its own folder. A `.uis` file reads without one.
     public var appearance: String?
+    /// The tab to show, by name, the document's first unless given. Its toolbar item shows held down, and only its
+    /// controls and visuals, and those in no tab, are drawn.
+    public var tab: String?
+    /// The pane to show, by name, the document's first unless given, as the tab is.
+    public var pane: String?
     /// Where to write the PNG.
     public var output: String
 
@@ -32,6 +37,8 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         title: String? = nil,
         directory: String? = nil,
         appearance: String? = nil,
+        tab: String? = nil,
+        pane: String? = nil,
         output: String
     ) {
         self.document = document
@@ -41,6 +48,8 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         self.title = title
         self.directory = directory
         self.appearance = appearance
+        self.tab = tab
+        self.pane = pane
         self.output = output
     }
 
@@ -59,7 +68,21 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         public let appearanceDirectory: URL?
         /// The appearance the document was read with, whose fonts it draws in, or `nil` for none or a `.uis` file.
         public let appearance: Appearance?
+        /// The toolbar item of the tab to show, or `nil` for the document's first.
+        public let tabItem: String?
+        /// The pane to show, or `nil` for the document's first.
+        public let pane: String?
         public let output: URL
+
+        /// Shows the requested tab and pane in `view`, which is made from `script`.
+        public func show(in view: UIView) {
+            if let tabItem {
+                view.setSelected(true, named: tabItem)
+            }
+            if let pane {
+                view.setSelected(true, named: pane)
+            }
+        }
     }
 
     /// Reads the document the request names, refusing a request that doesn't make sense.
@@ -105,6 +128,18 @@ public struct RenderRequest: Codable, Sendable, Equatable {
             throw RenderError.unreadableDocument(error.localizedDescription)
         }
 
+        // A tab is shown by selecting the toolbar item that names it, as a click on it would.
+        var tabItem: String?
+        if let tab {
+            guard let item = script.toolbarItems.first(where: { $0.tab == tab }) else {
+                throw RenderError.invalidRequest("it shows the tab \"\(tab)\", which the document doesn't have")
+            }
+            tabItem = item.name
+        }
+        if let pane, script.sidebar?.panes.contains(where: { $0.name == pane }) != true {
+            throw RenderError.invalidRequest("it shows the pane \"\(pane)\", which the document doesn't have")
+        }
+
         return Resolved(
             script: script,
             theme: (theme ?? .depot).theme,
@@ -113,6 +148,8 @@ public struct RenderRequest: Codable, Sendable, Equatable {
                 ?? pathURL?.deletingLastPathComponent(),
             appearanceDirectory: appearanceURL?.deletingLastPathComponent(),
             appearance: format == .uis ? nil : shared,
+            tabItem: tabItem,
+            pane: pane,
             output: URL(fileURLWithPath: output)
         )
     }

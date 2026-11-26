@@ -34,13 +34,19 @@ struct DepotRenderCommand: ParsableCommand {
     @Option(help: "A Hudini appearance file to read the document with, as a game reads its windows.")
     var appearance: String?
 
+    @Option(help: "The tab to show, by name. Defaults to the document's first.")
+    var tab: String?
+
+    @Option(help: "The pane to show, by name. Defaults to the document's first.")
+    var pane: String?
+
     @Flag(help: "Read requests from standard input, one JSON object per line.")
     var serve = false
 
     func validate() throws {
         if serve {
-            guard document == nil, output == nil else {
-                throw ValidationError("--serve takes its documents from standard input, not the command line.")
+            guard document == nil, output == nil, tab == nil, pane == nil else {
+                throw ValidationError("--serve takes its documents, and what to show of them, from standard input, not the command line.")
             }
         } else {
             guard document != nil else {
@@ -72,6 +78,8 @@ struct DepotRenderCommand: ParsableCommand {
                 theme: theme,
                 title: title,
                 appearance: appearance,
+                tab: tab,
+                pane: pane,
                 output: output ?? ""
             )
             do {
