@@ -5,7 +5,7 @@ Depot's tests read these: `Depot.Interface.Tests` reads every `.uix` here, and `
 GPL.
 
 The `.uix` files are Hudini's examples (`Demo/Sources/hudini-demo/Resources/` and its `city/` folder, Hudini
-commit `bf6cf15`), which follow the
+commit `5f5e565`), which follow the
 [UIScript spec](https://github.com/tonytins/VentureOS/blob/main/docs/uiscript/README.md)'s Hudini subset. Their lists
 and text areas show their own scroll bars, with no slider or buttons beside them to scroll them, and their sliders
 choose values.
