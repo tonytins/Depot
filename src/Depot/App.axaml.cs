@@ -15,9 +15,12 @@ public sealed class App : Application
         {
             MainWindow window = new();
             desktop.MainWindow = window;
-            // Depot document.uix opens it.
-            if (desktop.Args is [var path, ..])
-                window.Open(path);
+            // Depot [--appearance appearance.xml] [document.uix]: reads with the appearance, and opens the document.
+            var (document, appearance) = StartupArguments.Read(desktop.Args ?? []);
+            if (appearance is not null)
+                window.UseAppearance(appearance);
+            if (document is not null)
+                window.Open(document);
         }
 
         base.OnFrameworkInitializationCompleted();

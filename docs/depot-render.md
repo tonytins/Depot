@@ -11,7 +11,7 @@ on a virtual display such as Xvfb.
 ## Drawing one document
 
 ```sh
-depot-render <document> --output <file.png> [--theme depot|depot-light|standard] [--title <text>] [--format uix|uis]
+depot-render <document> --output <file.png> [--theme depot|depot-light|standard] [--title <text>] [--format uix|uis] [--appearance <file>]
 ```
 
 | Option | What it does |
@@ -21,13 +21,14 @@ depot-render <document> --output <file.png> [--theme depot|depot-light|standard]
 | `--theme` | The look: `depot` (the default), `depot-light`, or `standard`, Hudini's own. These are Hudini's `InterfaceTheme.depot`, `.depotLight`, and `.standard`. |
 | `--title` | The title a window's bar shows. Defaults to the document's file name. |
 | `--format` | How the document is written. Defaults to `uis` for a `.uis` file, and `uix` for anything else. |
+| `--appearance` | A Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances) the document is read with, as a game reads its windows: its images and styles, which the document may name without declaring, and its scroll bar art. A `.uis` file is read without it. |
 
 It prints the [frame map](#the-frame-map) on standard output, and anything wrong on standard error.
 
 | Exit status | Meaning |
 | --- | --- |
 | 0 | Drawn. |
-| 1 | It couldn't draw: the document couldn't be read or Hudini refuses it, its size can't be drawn, the PNG couldn't be written, or there's no display. |
+| 1 | It couldn't draw: the document or the appearance couldn't be read or Hudini refuses it, its size can't be drawn, the PNG couldn't be written, or there's no display. |
 | 64 | The command line doesn't make sense, such as no document or no `--output`. |
 
 ## Serving requests
@@ -50,6 +51,7 @@ A request is an object with these fields:
 | `theme` | `depot`, `depot-light`, or `standard`. Defaults to `depot`. |
 | `title` | The title a window's bar shows. Defaults to the file name, or nothing. |
 | `directory` | The folder image paths start from. Defaults to the document's folder. |
+| `appearance` | A Hudini appearance file the document is read with, as `--appearance` is. |
 | `output` | Where to write the PNG. Required. |
 
 ```json
@@ -98,5 +100,6 @@ Toolbar items and the title field aren't in `elements`, since Hudini doesn't say
 - A document is read only up to 4 MiB, and a picture is from 1 to 8192 pixels on each side.
 - Text is drawn in raylib's default font; a game loads its own.
 - String references show their table and index, as Hudini shows a string its host can't find.
-- Image paths are read as files relative to `directory`. Images that aren't found are outlined in red.
+- Image paths are read as files relative to `directory`, then to the appearance's folder, where an appearance's own
+  images are. Images that aren't found are outlined in red.
 - Rounded corners are drawn without antialiasing, which a game can turn on.

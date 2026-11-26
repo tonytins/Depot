@@ -31,6 +31,9 @@ struct DepotRenderCommand: ParsableCommand {
     @Option(help: "How the document is written: uix or uis. Defaults to its extension.")
     var format: DocumentFormat?
 
+    @Option(help: "A Hudini appearance file to read the document with, as a game reads its windows.")
+    var appearance: String?
+
     @Flag(help: "Read requests from standard input, one JSON object per line.")
     var serve = false
 
@@ -63,7 +66,14 @@ struct DepotRenderCommand: ParsableCommand {
                 Self.serve(with: renderer)
                 return
             }
-            let request = RenderRequest(path: document, format: format, theme: theme, title: title, output: output ?? "")
+            let request = RenderRequest(
+                path: document,
+                format: format,
+                theme: theme,
+                title: title,
+                appearance: appearance,
+                output: output ?? ""
+            )
             do {
                 let map = try renderer.render(request)
                 let encoder = JSONEncoder()

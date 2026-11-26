@@ -35,6 +35,18 @@ On the canvas:
   kept under Other.
 - Undo (Ctrl+Z) and Redo (Ctrl+Shift+Z) take back any change, typed or designed; a whole drag is one change.
 
+A game can read its windows with a Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances):
+one file holding the images, styles, and scroll bar art they share. A window that names a shared style or image
+doesn't read without it, so Depot can read and draw documents with one too. Choose it from the Appearance button
+beside Look, or start Depot with it:
+
+```sh
+dotnet run --project src/Depot -- --appearance path/to/appearance.xml path/to/document.uix
+```
+
+Depot then designs such a window, and draws it with the appearance's scroll bar art, as the game does. A `.uis` file
+is read without one, as Hudini reads it.
+
 Depot draws with `depot-render`, which it looks for in this order: the path in `DEPOT_RENDER`, beside Depot itself,
 the newer of `depot-render/.build/release` and `depot-render/.build/debug` in the checkout Depot runs from, and the
 `PATH`. Without it, Depot edits text but can't draw.

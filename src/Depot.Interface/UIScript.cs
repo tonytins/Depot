@@ -497,6 +497,17 @@ public sealed class UIScript
     /// <summary>Attributes the reader didn't know and skipped. Log them while developing, to catch typos.</summary>
     public IReadOnlyList<UIIgnoredAttribute> IgnoredAttributes { get; private init; } = [];
 
+    /// <summary>
+    /// The Hudini appearance the document was read with, whose images and styles it may name without declaring, or
+    /// <see langword="null"/> for none.
+    /// </summary>
+    public HudiniAppearance? Appearance { get; private init; }
+
+    // Whether an image or style name is declared, by the document or by the appearance it's read with.
+    private bool HasImage(string name) => Images.ContainsKey(name) || Appearance?.ImageNames.Contains(name) == true;
+
+    private bool HasStyle(string name) => Styles.ContainsKey(name) || Appearance?.StyleNames.Contains(name) == true;
+
     /// <summary>The control with this name, or <see langword="null"/>.</summary>
     public UIControl? Control(string name)
     {
@@ -509,9 +520,12 @@ public sealed class UIScript
         return null;
     }
 
-    /// <summary>Reads a document from its text.</summary>
+    /// <summary>
+    /// Reads a document from its text, with a Hudini appearance whose images and styles it may name, as a game reads
+    /// its windows.
+    /// </summary>
     /// <exception cref="UIScriptException">The document isn't valid UIScript; the message says why.</exception>
-    public static UIScript Parse(string text)
+    public static UIScript Parse(string text, HudiniAppearance? appearance = null)
     {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -525,7 +539,7 @@ public sealed class UIScript
             throw new UIScriptException(exception.Reason, exception.Line);
         }
 
-        return Build(document);
+        return Build(document, appearance);
     }
 
     /// <summary>Reads a UTF-8 file.</summary>
@@ -537,7 +551,7 @@ public sealed class UIScript
         return Parse(File.ReadAllText(path, System.Text.Encoding.UTF8));
     }
 
-    internal static UIScript Build(FlatXmlDocument document)
+    internal static UIScript Build(FlatXmlDocument document, HudiniAppearance? appearance = null)
     {
         var root = document.Root;
         if (root.Name != "UIScript")
@@ -832,6 +846,7 @@ public sealed class UIScript
             Panes = panes,
             StatusItem = statusItem,
             IgnoredAttributes = ignored,
+            Appearance = appearance,
         };
         script.Validate();
         return script;
@@ -853,7 +868,7 @@ public sealed class UIScript
             throw new UIScriptException("A status item has no title bar, so no title field.", field.Line);
         if (Sidebar is { } side)
             throw new UIScriptException("A status item can't have a sidebar.", side.Line);
-        if (status.Image is { } image && !Images.ContainsKey(image))
+        if (status.Image is { } image && !HasImage(image))
             throw new UIScriptException($"The status item \"{status.Name}\" shows the image \"{image}\", which isn't an <Image>.", status.Line);
 
         var holdsContent = Controls.Count > 0 || Visuals.Count > 0;
@@ -1181,13 +1196,13 @@ public sealed class UIScript
 
         foreach (var item in ToolbarItems)
         {
-            if (item.Image is { } itemImage && !Images.ContainsKey(itemImage))
+            if (item.Image is { } itemImage && !HasImage(itemImage))
                 throw Unknown(item.Name, "image", itemImage, item.Line);
         }
 
         foreach (var visual in Visuals)
         {
-            if (!Images.ContainsKey(visual.Image))
+            if (!HasImage(visual.Image))
                 throw Unknown(visual.Name, "image", visual.Image, visual.Line);
             ValidateFrame(visual.Frame, visual.Name, visual.Line);
         }
@@ -1235,14 +1250,14 @@ public sealed class UIScript
             if (!(step > 0) || step > highest - lowest)
                 throw new UIScriptException($"\"{name}\" has a step of {step}: a step is above 0, and no more than the slider's range, {highest - lowest}.", line);
         }
-        if (control.Style is { } style && !Styles.ContainsKey(style))
+        if (control.Style is { } style && !HasStyle(style))
             throw Unknown(name, "style", style, line);
 
         if (control.Image is { } image)
         {
             if (type != UIControlType.Button)
                 throw OnlyFor(name, "image", "a Button", line);
-            if (!Images.ContainsKey(image))
+            if (!HasImage(image))
                 throw Unknown(name, "image", image, line);
         }
         else if (control.Frame.Width is null || control.Frame.Height is null)
@@ -1274,7 +1289,7 @@ public sealed class UIScript
             throw new UIScriptException($"{Quoted(item, grid)} has both an image and a color; an item shows one.", item.Line);
         if (item.Image is null && item.Color is null && item.Title is null)
             throw new UIScriptException($"{Quoted(item, grid)} needs a title, an image, or a color to show.", item.Line);
-        if (item.Image is { } image && !Images.ContainsKey(image))
+        if (item.Image is { } image && !HasImage(image))
             throw Unknown(owner, "image", image, item.Line);
         if (item.Title is { IsReference: true } title && !Strings.ContainsKey(title.Value))
             throw Unknown(owner, "string", title.Value, item.Line);

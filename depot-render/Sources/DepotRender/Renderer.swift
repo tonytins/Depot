@@ -42,7 +42,9 @@ public final class Renderer {
         var textures: [Texture2D] = []
         defer { textures.forEach(UnloadTexture) }
         let view = UIView(script: resolved.script, theme: resolved.theme, loadImage: { resource in
-            guard let texture = Self.loadTexture(resource, in: resolved.imageDirectory) else {
+            // An inherited image is relative to the appearance's folder, a window's own to the document's.
+            guard let texture = Self.loadTexture(resource, in: resolved.imageDirectory)
+                ?? Self.loadTexture(resource, in: resolved.appearanceDirectory) else {
                 return nil
             }
             textures.append(texture)
@@ -79,7 +81,7 @@ public final class Renderer {
         return map
     }
 
-    // An image path is the host's to interpret; depot-render reads it as a file, relative to the document's folder.
+    // An image path is the host's to interpret; depot-render reads it as a file, relative to a folder.
     private static func loadTexture(_ resource: UIScript.ImageResource, in directory: URL?) -> Texture2D? {
         guard let path = resource.path, !path.isEmpty else {
             return nil

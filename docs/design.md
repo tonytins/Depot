@@ -78,6 +78,7 @@ to be drawn, and older requests are dropped.
 | 2026-11-25 | `.uis` files open read-only. | Hudini reads them for The Sims Online's interfaces; Depot shows them, and leaves writing them alone. |
 | 2026-11-25 | The default look is Hudini's `InterfaceTheme.depot`, which Depot wears too. | CityLimits' blue-slate and amber, softened after Adwaita by way of the VentureOS HIG. It lives in Hudini so a game can draw exactly what Depot shows. See [Depot's look](hig.md). |
 | 2026-11-25 | Save writes the text as typed, even text Hudini refuses, and warns. | As Roundhouse does, so work in progress can always be saved. Designer edits can't leave the subset. |
+| 2026-11-25 | Documents can be read and drawn with a Hudini appearance, chosen in the window or with `--appearance`. | A game reads its windows with one, and a window that names a shared style or image is refused without it. Depot's reader takes only the appearance's names; Hudini checks the rest when depot-render draws, so the two can't disagree. |
 
 ## What's not there yet
 

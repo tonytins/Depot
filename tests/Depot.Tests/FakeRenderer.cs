@@ -23,7 +23,9 @@ public sealed class FakeRenderer
     public Task<RenderReply> RenderAsync(RenderRequest request)
     {
         Requests.Add(request);
-        var document = UIDocument.Read(request.Document ?? "");
+        // As depot-render does, a document is read with the appearance the request names.
+        var appearance = request.Appearance is { } path ? HudiniAppearance.Load(path) : null;
+        var document = UIDocument.Read(request.Document ?? "", appearance);
         if (document.Problem is { } problem)
             return Task.FromResult(new RenderReply(null, $"Hudini can't read the document: {problem.Message}"));
 

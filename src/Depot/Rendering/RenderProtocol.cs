@@ -62,6 +62,9 @@ public sealed record RenderRequest
     /// <summary>The folder the document's image paths start from.</summary>
     public string? Directory { get; init; }
 
+    /// <summary>A Hudini appearance file the document is read with, as a game reads its windows.</summary>
+    public string? Appearance { get; init; }
+
     /// <summary>Where to write the PNG.</summary>
     public required string Output { get; init; }
 

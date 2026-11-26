@@ -21,8 +21,9 @@ public sealed class UIDocument
     /// <summary>The root element, <c>&lt;UIScript&gt;</c>, wherever an edit takes an element's index.</summary>
     public const int Root = FlatXmlEditor.Root;
 
-    private UIDocument(string text, FlatXmlDocument? xml, UIScript? script, UIScriptException? problem)
+    private UIDocument(string text, FlatXmlDocument? xml, UIScript? script, UIScriptException? problem, HudiniAppearance? appearance)
     {
+        Appearance = appearance;
         Text = text;
         Xml = xml;
         Script = script;
@@ -31,6 +32,12 @@ public sealed class UIDocument
 
     /// <summary>The document's text, exactly, including a byte order mark if the file has one.</summary>
     public string Text { get; }
+
+    /// <summary>
+    /// The Hudini appearance the document is read with, whose images and styles it may name without declaring, or
+    /// <see langword="null"/> for none. Every edit reads the result with it too.
+    /// </summary>
+    public HudiniAppearance? Appearance { get; }
 
     /// <summary>
     /// The document's elements with where each sits in <see cref="Text"/>, or <see langword="null"/> when the text
@@ -51,8 +58,11 @@ public sealed class UIDocument
     /// </summary>
     public bool IsEditable => Script is not null;
 
-    /// <summary>Reads a document from its text. Text Hudini refuses still gives a document, with its <see cref="Problem"/>.</summary>
-    public static UIDocument Read(string text)
+    /// <summary>
+    /// Reads a document from its text, with the Hudini appearance a game reads it with, if any. Text Hudini refuses
+    /// still gives a document, with its <see cref="Problem"/>.
+    /// </summary>
+    public static UIDocument Read(string text, HudiniAppearance? appearance = null)
     {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -63,31 +73,31 @@ public sealed class UIDocument
         }
         catch (FlatXmlException exception)
         {
-            return new UIDocument(text, null, null, new UIScriptException(exception.Reason, exception.Line));
+            return new UIDocument(text, null, null, new UIScriptException(exception.Reason, exception.Line), appearance);
         }
 
         try
         {
             HudiniSubset.Check(xml);
-            return new UIDocument(text, xml, UIScript.Build(xml), null);
+            return new UIDocument(text, xml, UIScript.Build(xml, appearance), null, appearance);
         }
         catch (UIScriptException exception)
         {
-            return new UIDocument(text, xml, null, exception);
+            return new UIDocument(text, xml, null, exception, appearance);
         }
     }
 
     /// <summary>Reads a UTF-8 file, keeping every byte of it, a byte order mark included.</summary>
     /// <exception cref="IOException">The file couldn't be read.</exception>
     /// <exception cref="InvalidDataException">The file isn't UTF-8, so it couldn't be written back unchanged.</exception>
-    public static UIDocument Load(string path)
+    public static UIDocument Load(string path, HudiniAppearance? appearance = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
         var bytes = File.ReadAllBytes(path);
         try
         {
             // GetString keeps a byte order mark as U+FEFF, where reading the file as text would drop it.
-            return Read(Utf8.GetString(bytes));
+            return Read(Utf8.GetString(bytes), appearance);
         }
         catch (DecoderFallbackException exception)
         {
@@ -240,7 +250,7 @@ public sealed class UIDocument
         if (ReferenceEquals(text, Text))
             return this;
 
-        var edited = Read(text);
+        var edited = Read(text, Appearance);
         return edited.Problem is { } problem ? throw problem : edited;
     }
 }

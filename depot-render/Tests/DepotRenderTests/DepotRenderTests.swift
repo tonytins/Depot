@@ -157,3 +157,63 @@ private let button = #"<Button name="ok" x="10" y="20" width="80" height="24"/>"
     #expect(explain(#"{"path":"a.uix","output":"o.png","theme":"pink"}"#)
         == "The request's theme isn't one depot-render knows; it takes standard, depot, depot-light.")
 }
+
+// MARK: Appearances
+
+private func temporaryFolder() throws -> URL {
+    let folder = FileManager.default.temporaryDirectory.appendingPathComponent("depot-render-\(UUID())", isDirectory: true)
+    try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    return folder
+}
+
+@Test func aDocumentReadsWithAnAppearanceAsAGameReadsIt() throws {
+    let folder = try temporaryFolder()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let appearance = folder.appendingPathComponent("appearance.xml")
+    try Data("""
+        <Appearance version="1">
+          <Image name="thumb" path="scroll/thumb.png"/>
+          <ScrollBar width="12" thumb="thumb"/>
+          <Style name="chatText" textColor="#FFF99D"/>
+        </Appearance>
+        """.utf8).write(to: appearance)
+    let document = """
+        <UIScript version="1"><Window width="200" height="100"/>
+          <List name="history" x="0" y="0" width="200" height="100" style="chatText"/>
+        </UIScript>
+        """
+
+    // Without the appearance, the shared style is a name Hudini can't find.
+    #expect(throws: RenderError.self) {
+        try RenderRequest(document: document, output: "out.png").resolve()
+    }
+    let read = try RenderRequest(document: document, directory: "/tmp", appearance: appearance.path, output: "out.png").resolve()
+    #expect(read.script.styles["chatText"] != nil)
+    #expect(read.script.scrollBar?.width == 12)
+    #expect(read.appearanceDirectory?.standardizedFileURL == folder.standardizedFileURL)
+    #expect(read.imageDirectory?.path == "/tmp")
+}
+
+@Test func anAppearanceHudiniRefusesSaysWhy() throws {
+    let folder = try temporaryFolder()
+    defer { try? FileManager.default.removeItem(at: folder) }
+    let appearance = folder.appendingPathComponent("appearance.xml")
+    try Data("<Appearance version='1'><Button name='b'/></Appearance>".utf8).write(to: appearance)
+    let request = RenderRequest(document: #"<UIScript version="1"><Window width="10" height="10"/></UIScript>"#,
+                                appearance: appearance.path, output: "o.png")
+
+    #expect(throws: RenderError.unreadableAppearance(appearance.path, reason: UIScriptError.unexpectedAppearanceElement("Button", line: 1).localizedDescription)) {
+        try request.resolve()
+    }
+    let missing = RenderRequest(document: #"<UIScript version="1"><Window width="10" height="10"/></UIScript>"#,
+                                appearance: folder.appendingPathComponent("none.xml").path, output: "o.png")
+    #expect(throws: RenderError.self) {
+        try missing.resolve()
+    }
+}
+
+@Test func theAppearanceFieldDecodesFromARequestLine() throws {
+    let line = #"{"document": "<UIScript/>", "appearance": "/games/x/appearance.xml", "output": "/tmp/o.png"}"#
+    let request = try JSONDecoder().decode(RenderRequest.self, from: Data(line.utf8))
+    #expect(request.appearance == "/games/x/appearance.xml")
+}

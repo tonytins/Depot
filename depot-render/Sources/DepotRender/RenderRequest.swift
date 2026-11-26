@@ -18,6 +18,9 @@ public struct RenderRequest: Codable, Sendable, Equatable {
     public var title: String?
     /// The folder the document's image paths are relative to, the document's own folder unless given.
     public var directory: String?
+    /// A Hudini appearance file the document is read with, as a game reads its windows. Its image paths are relative
+    /// to its own folder. A `.uis` file reads without one.
+    public var appearance: String?
     /// Where to write the PNG.
     public var output: String
 
@@ -28,6 +31,7 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         theme: ThemeName? = nil,
         title: String? = nil,
         directory: String? = nil,
+        appearance: String? = nil,
         output: String
     ) {
         self.document = document
@@ -36,6 +40,7 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         self.theme = theme
         self.title = title
         self.directory = directory
+        self.appearance = appearance
         self.output = output
     }
 
@@ -49,6 +54,8 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         public let theme: InterfaceTheme
         public let title: String
         public let imageDirectory: URL?
+        /// The appearance's folder, where its images are looked for when the document's folder hasn't them.
+        public let appearanceDirectory: URL?
         public let output: URL
     }
 
@@ -81,9 +88,16 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         }
 
         let format = format ?? (pathURL?.pathExtension.lowercased() == "uis" ? .uis : .uix)
+        let appearanceURL = appearance.map { URL(fileURLWithPath: $0) }
+        let shared: Appearance?
+        do {
+            shared = try appearanceURL.map { try Appearance(contentsOf: $0) }
+        } catch {
+            throw RenderError.unreadableAppearance(appearanceURL?.path ?? "", reason: error.localizedDescription)
+        }
         let script: UIScript
         do {
-            script = try format == .uis ? UIScript(uisData: data) : UIScript(data: data)
+            script = try format == .uis ? UIScript(uisData: data) : UIScript(data: data, appearance: shared)
         } catch {
             throw RenderError.unreadableDocument(error.localizedDescription)
         }
@@ -94,6 +108,7 @@ public struct RenderRequest: Codable, Sendable, Equatable {
             title: title ?? pathURL?.deletingPathExtension().lastPathComponent ?? "",
             imageDirectory: directory.map { URL(fileURLWithPath: $0, isDirectory: true) }
                 ?? pathURL?.deletingLastPathComponent(),
+            appearanceDirectory: appearanceURL?.deletingLastPathComponent(),
             output: URL(fileURLWithPath: output)
         )
     }
@@ -134,6 +149,8 @@ public enum RenderError: Error, LocalizedError, Equatable {
     case unreadable(String, reason: String)
     /// Hudini refuses the document.
     case unreadableDocument(String)
+    /// The appearance couldn't be read, or Hudini refuses it.
+    case unreadableAppearance(String, reason: String)
     /// The document's size can't be drawn.
     case unsupportedSize(width: Float, height: Float)
     /// raylib couldn't open its window, usually because there's no display.
@@ -149,6 +166,8 @@ public enum RenderError: Error, LocalizedError, Equatable {
             "Couldn't read \(path): \(reason)"
         case let .unreadableDocument(reason):
             "Hudini can't read the document: \(reason)"
+        case let .unreadableAppearance(path, reason):
+            "Hudini can't read the appearance \(path): \(reason)"
         case let .unsupportedSize(width, height):
             "The document is \(width) by \(height) pixels; depot-render draws from 1 to \(FrameMap.maximumSide) on each side."
         case .noDisplay:

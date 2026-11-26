@@ -40,6 +40,8 @@ public sealed partial class MainWindow : Window
     private readonly Button redoButton;
     private readonly Button addButton;
     private readonly ComboBox lookPicker;
+    private readonly Button appearanceButton;
+    private HudiniAppearance? appearance;
     private readonly TextBlock status;
     private readonly Image canvas;
     private readonly Panel canvasHost;
@@ -82,6 +84,7 @@ public sealed partial class MainWindow : Window
         redoButton = this.Get<Button>("RedoButton");
         addButton = this.Get<Button>("AddButton");
         lookPicker = this.Get<ComboBox>("LookPicker");
+        appearanceButton = this.Get<Button>("AppearanceButton");
         status = this.Get<TextBlock>("Status");
         canvas = this.Get<Image>("Canvas");
         canvasHost = this.Get<Panel>("CanvasHost");
@@ -101,6 +104,7 @@ public sealed partial class MainWindow : Window
         undoButton.Click += (_, _) => Undo();
         redoButton.Click += (_, _) => Redo();
         addButton.Click += (_, _) => ShowLibrary();
+        appearanceButton.Click += (_, _) => ShowAppearanceChoices();
 
         redraw = new DispatcherTimer { Interval = RedrawDelay };
         redraw.Tick += (_, _) =>
@@ -193,10 +197,74 @@ public sealed partial class MainWindow : Window
         {
             if (document is not { IsUis: false })
                 return null;
-            if (design is null || design.Text != editor.Text)
-                design = UIDocument.Read(editor.Text);
+            if (design is null || design.Text != editor.Text || !ReferenceEquals(design.Appearance, appearance))
+                design = UIDocument.Read(editor.Text, appearance);
             return design;
         }
+    }
+
+    /// <summary>
+    /// The Hudini appearance file documents are read and drawn with, as a game reads its windows, or
+    /// <see langword="null"/> for none. A <c>.uis</c> file is read without one, as Hudini reads it.
+    /// </summary>
+    public string? AppearancePath { get; private set; }
+
+    /// <summary>
+    /// Reads documents with the appearance at <paramref name="path"/> from now on, or with none for
+    /// <see langword="null"/>, and draws the open one again. An appearance Hudini wouldn't read is refused, saying why
+    /// in the status bar, and the one in use stays.
+    /// </summary>
+    /// <returns>Whether the appearance is in use.</returns>
+    public bool UseAppearance(string? path)
+    {
+        HudiniAppearance? loaded = null;
+        string? fullPath = null;
+        if (path is not null)
+        {
+            try
+            {
+                fullPath = System.IO.Path.GetFullPath(path);
+                loaded = HudiniAppearance.Load(fullPath);
+            }
+            catch (Exception exception) when (exception is UIScriptException or IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                ShowStatus($"Depot can't use the appearance {System.IO.Path.GetFileName(path)}: {exception.Message}", isProblem: true);
+                return false;
+            }
+        }
+
+        appearance = loaded;
+        AppearancePath = fullPath;
+        appearanceButton.Content = fullPath is null ? "No appearance ▾" : $"Appearance: {System.IO.Path.GetFileName(fullPath)} ▾";
+        ToolTip.SetTip(appearanceButton, fullPath ?? "The Hudini appearance documents are read with, as a game reads its windows");
+        design = null;
+        RequestPicture();
+        ShowPanels();
+        return true;
+    }
+
+    private void ShowAppearanceChoices()
+    {
+        MenuFlyout choices = new() { Placement = PlacementMode.BottomEdgeAlignedRight };
+        MenuItem choose = new() { Header = "Choose an Appearance…" };
+        choose.Click += async (_, _) => await ChooseAppearanceAsync();
+        MenuItem none = new() { Header = "No Appearance", IsEnabled = AppearancePath is not null };
+        none.Click += (_, _) => UseAppearance(null);
+        choices.Items.Add(choose);
+        choices.Items.Add(none);
+        choices.ShowAt(appearanceButton);
+    }
+
+    private async Task ChooseAppearanceAsync()
+    {
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Choose a Hudini Appearance",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("Hudini appearances") { Patterns = ["*.xml"] }],
+        });
+        if (files is [var file] && file.TryGetLocalPath() is { } path)
+            UseAppearance(path);
     }
 
     /// <summary>The selected element, by its index among the document's elements, or <see langword="null"/>.</summary>
@@ -513,6 +581,7 @@ public sealed partial class MainWindow : Window
             Theme = Look.Name(),
             Title = Path.GetFileNameWithoutExtension(open.Path),
             Directory = Path.GetDirectoryName(open.Path),
+            Appearance = open.IsUis ? null : AppearancePath,
             Output = Path.Combine(pictureFolder, "canvas.png"),
             DocumentId = documentId,
         });
