@@ -65,6 +65,12 @@ public sealed record RenderRequest
     /// <summary>A Hudini appearance file the document is read with, as a game reads its windows.</summary>
     public string? Appearance { get; init; }
 
+    /// <summary>The tab to show, by name; the document's first without one.</summary>
+    public string? Tab { get; init; }
+
+    /// <summary>The pane to show, by name; the document's first without one.</summary>
+    public string? Pane { get; init; }
+
     /// <summary>Where to write the PNG.</summary>
     public required string Output { get; init; }
 
@@ -85,6 +91,9 @@ public sealed record FrameElement(string Name, string Element, FrameRect Frame, 
 
 /// <summary>Where Hudini placed everything a document draws, as depot-render reports it.</summary>
 /// <param name="Kind"><c>window</c> or <c>panel</c>.</param>
+/// <param name="Sidebar">Where a window's sidebar is drawn, or <see langword="null"/> without one.</param>
+/// <param name="Tab">The tab shown, or <see langword="null"/> for a document without tabs.</param>
+/// <param name="Pane">The pane shown, or <see langword="null"/> for a document without panes.</param>
 public sealed record FrameMap(
     string Kind,
     float Width,
@@ -94,7 +103,10 @@ public sealed record FrameMap(
     IReadOnlyList<string> MissingImages,
     IReadOnlyList<string> MissingStrings,
     IReadOnlyList<string> IgnoredAttributes,
-    IReadOnlyList<string> Notes);
+    IReadOnlyList<string> Notes,
+    FrameRect? Sidebar = null,
+    string? Tab = null,
+    string? Pane = null);
 
 /// <summary>depot-render's answer to a request: where everything went, or why it couldn't draw.</summary>
 public sealed record RenderReply(FrameMap? Frames, string? Error)

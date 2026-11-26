@@ -270,6 +270,9 @@ public sealed partial class MainWindow : Window
     /// <summary>The selected element, by its index among the document's elements, or <see langword="null"/>.</summary>
     public int? Selection { get; private set; }
 
+    /// <summary>The tab and pane the canvas shows, which follow the selection.</summary>
+    public ShownParts Shown { get; private set; } = new();
+
     /// <summary>The inspector, for tests to read and edit.</summary>
     public InspectorPanel Inspector => inspector;
 
@@ -295,6 +298,7 @@ public sealed partial class MainWindow : Window
         documentId++;
         design = null;
         Selection = null;
+        Shown = new();
         loading = true;
         try
         {
@@ -371,6 +375,14 @@ public sealed partial class MainWindow : Window
         if (element is { } index && (Design?.Xml is not { } xml || index < 0 || index >= xml.Children.Count))
             throw new ArgumentOutOfRangeException(nameof(element), element, "The document has no such element.");
         Selection = element;
+
+        // Something in a tab or pane that isn't shown is drawn once it's asked for; its outline follows the picture.
+        if (Design is { IsEditable: true } current && Shown.Selecting(current, element) is var shown && shown != Shown)
+        {
+            Shown = shown;
+            RequestPicture();
+        }
+
         ShowSelection();
         ShowPanels();
     }
@@ -573,6 +585,7 @@ public sealed partial class MainWindow : Window
         }
 
         Directory.CreateDirectory(pictureFolder);
+        var shown = !open.IsUis && Design is { } current ? Shown.In(current) : new ShownParts();
         preview.Request(new RenderRequest
         {
             Document = open.IsUis ? null : text,
@@ -582,6 +595,8 @@ public sealed partial class MainWindow : Window
             Title = Path.GetFileNameWithoutExtension(open.Path),
             Directory = Path.GetDirectoryName(open.Path),
             Appearance = open.IsUis ? null : AppearancePath,
+            Tab = shown.Tab,
+            Pane = shown.Pane,
             Output = Path.Combine(pictureFolder, "canvas.png"),
             DocumentId = documentId,
         });
@@ -656,7 +671,16 @@ public sealed partial class MainWindow : Window
             notes.Add($"{frames.MissingStrings.Count} {(frames.MissingStrings.Count == 1 ? "string shows its" : "strings show their")} table and index, since Depot doesn't read string tables yet.");
         if (frames.Notes.Count > 0)
             notes.Add($"{frames.Notes.Count} {(frames.Notes.Count == 1 ? "part" : "parts")} of the .uis file Hudini can't represent.");
-        return notes.Count == 0 ? $"{frames.Width:0} × {frames.Height:0}, as Hudini draws it." : string.Join(" ", notes);
+        if (notes.Count > 0)
+            return string.Join(" ", notes);
+        var showing = (frames.Tab, frames.Pane) switch
+        {
+            ({ } tab, { } pane) => $", showing the {tab} tab and the {pane} pane",
+            ({ } tab, null) => $", showing the {tab} tab",
+            (null, { } pane) => $", showing the {pane} pane",
+            _ => "",
+        };
+        return $"{frames.Width:0} × {frames.Height:0}, as Hudini draws it{showing}.";
     }
 
     /// <summary>
