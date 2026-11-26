@@ -9,8 +9,10 @@ namespace Depot.Interface;
 /// Depot makes is what a game reads.
 /// </summary>
 /// <remarks>
-/// It follows the spec, not Hudini's current release, where the two differ: Hudini still reads the scroll sliders
-/// the spec dropped, which the reader here refuses, and doesn't know a slider's <c>step</c> yet, which it skips.
+/// It follows the spec, not any one release of Hudini. Since 2026-11-25 the two agree on what changed that week:
+/// Hudini refuses the scroll sliders and scroll buttons the spec dropped, as the reader here does, and reads a
+/// slider's <c>step</c>. A game whose Hudini is older reads the documents Depot makes, but reads <c>step</c> as an
+/// ignored attribute.
 /// </remarks>
 public static class HudiniSubset
 {
