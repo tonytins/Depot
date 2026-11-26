@@ -80,6 +80,7 @@ to be drawn, and older requests are dropped.
 | 2026-11-25 | Save writes the text as typed, even text Hudini refuses, and warns. | As Roundhouse does, so work in progress can always be saved. Designer edits can't leave the subset. |
 | 2026-11-25 | Documents can be read and drawn with a Hudini appearance, chosen in the window or with `--appearance`. | A game reads its windows with one, and a window that names a shared style or image is refused without it. Depot's reader takes only the appearance's names; Hudini checks the rest when depot-render draws, so the two can't disagree. |
 | 2026-11-26 | Tabs and a sidebar of panes are inside the subset: the reader reads `<Tab>` and a toolbar item's `tab`, and `HudiniSubset` lets in `<Sidebar>` and `<Pane>`, refusing a sidebar that holds controls or has no panes, and skips a sidebar's `edge`. | The spec gained `<Tab>` on 2026-11-25 and Hudini reads both. Depot's reader reads the whole spec, as VentureOS's would, so tabs are read here first; VentureOS's own reader refuses them until it's caught up. |
+| 2026-11-26 | The canvas shows the tab and pane of the selection: selecting something in one, the tab or pane itself, or a tab's toolbar item shows it, and anything else leaves what's shown. One that the text no longer has is let go of. | Selection already says what someone is working on, so it needs no tab strip of Depot's own, which would be a second, C# drawing of what Hudini draws. Letting go of a renamed tab keeps a typo from turning into a render error. |
 | 2026-11-26 | depot-render draws the tab and pane a request names, the first of each unless it names one, and the frame map says where the sidebar is and which are shown; what they leave out is `hidden`. | A designer has to show every tab of a document, not only the one a game opens on. The fields are optional both ways, so a caller from before them gets the map it always did. |
 | 2026-11-25 | An appearance's fonts are read and drawn: `<Font>` and `<Fonts>` are accepted, and depot-render loads font files relative to the appearance's folder. | Hudini's appearances now name a game's fonts, and its demo's does. Depot's reader checks only where they sit and their names; Hudini checks the rest when drawing. |
 
@@ -90,5 +91,3 @@ to be drawn, and older requests are dropped.
 - Toolbar items and the title field are selected from the outline, since Hudini doesn't report where it draws them.
 - Keyboard shortcuts use Ctrl, including on macOS.
 - Corners on the canvas are drawn without antialiasing.
-- The canvas shows a document's first tab and pane. depot-render can draw any of them, but choosing one from the
-  window isn't there yet.

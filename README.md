@@ -26,6 +26,9 @@ On the canvas:
 
 - Click to select a control, a picture, or the window; the outline selects anything, such as a style or a
   toolbar item, which Hudini doesn't report a frame for.
+- The canvas shows one tab and one pane at a time, the first of each, as a game does. Selecting something in another
+  one, the tab or pane itself, or the toolbar item that switches a tab shows that one instead, and the status bar
+  says which is showing.
 - Drag to move, or drag a handle to resize. The outline follows the pointer at once, and Hudini's picture as soon
   as it's drawn. The window and panel resize by their right and bottom edges.
 - The arrow keys move by a pixel, with Shift by 8. Delete deletes, Ctrl+D duplicates, and Ctrl+] and Ctrl+[ move
