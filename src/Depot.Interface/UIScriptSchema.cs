@@ -69,8 +69,8 @@ public enum UIAttributeGroup
 /// <param name="IsRequired">Whether every such element must have it.</param>
 /// <param name="Choices">The values a <see cref="UIAttributeKind.Choice"/> takes.</param>
 /// <param name="RefersTo">
-/// For a <see cref="UIAttributeKind.Reference"/>, the element it names: <c>Style</c>, <c>String</c>, <c>Image</c>,
-/// <c>Menu</c>, or <c>List</c> for a list or text area to scroll.
+/// For a <see cref="UIAttributeKind.Reference"/>, the element it names, such as <c>Style</c>, <c>String</c>,
+/// <c>Image</c>, <c>Menu</c>, <c>Pane</c>, or <c>Tab</c>.
 /// </param>
 public sealed record UIAttributeInfo(
     string Name,
@@ -214,6 +214,7 @@ public static class UIScriptSchema
             new("title", UIAttributeGroup.Text, UIAttributeKind.Text, IsRequired: true),
             new("image", UIAttributeGroup.Appearance, UIAttributeKind.Reference, RefersTo: "Image"),
             new("placement", UIAttributeGroup.Frame, UIAttributeKind.Choice, Choices: ["end", "start"]),
+            new("tab", UIAttributeGroup.Behaviour, UIAttributeKind.Reference, RefersTo: "Tab"),
         ],
         ["TitleField"] =
         [
@@ -230,6 +231,10 @@ public static class UIScriptSchema
         [
             new("name", UIAttributeGroup.Identity, UIAttributeKind.Name, IsRequired: true),
             new("title", UIAttributeGroup.Text, UIAttributeKind.Text, IsRequired: true),
+        ],
+        ["Tab"] =
+        [
+            new("name", UIAttributeGroup.Identity, UIAttributeKind.Name, IsRequired: true),
         ],
         ["Text"] = Control,
         ["FormattedText"] = Control,

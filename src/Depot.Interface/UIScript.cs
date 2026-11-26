@@ -270,7 +270,8 @@ public sealed record UIText(string Value, bool IsReference)
 /// A decorative image, shown with its <see cref="Pane"/> when it's in one, and placed from the sidebar's corner when
 /// it's <see cref="InSidebar"/>.
 /// </summary>
-public sealed record UIVisual(string Name, string Image, UIFrame Frame, int Line, string? Pane = null, bool InSidebar = false);
+public sealed record UIVisual(
+    string Name, string Image, UIFrame Frame, int Line, string? Pane = null, bool InSidebar = false, string? Tab = null);
 
 /// <summary>
 /// A control, with every attribute any control can take; those that don't apply are unset. One
@@ -298,7 +299,8 @@ public sealed record UIControl(
     bool Follows = false,
     string? Pane = null,
     bool InSidebar = false,
-    UIGridLayout? Grid = null);
+    UIGridLayout? Grid = null,
+    string? Tab = null);
 
 /// <summary>
 /// Which of the desktop's standard menus a document's menu adds to, so a host can merge it rather than show two
@@ -378,8 +380,17 @@ public sealed record UIShortcut(bool Control, bool Shift, bool Alt, char Key)
 /// <c>placement</c> shows a text item at the end, which still works, so neither needs a new element.
 /// </remarks>
 /// <param name="Image">The <c>&lt;Image&gt;</c> it shows, by name, or <see langword="null"/> for its title.</param>
+/// <param name="Tab">The <c>&lt;Tab&gt;</c> it shows, by name, or <see langword="null"/> for an ordinary item.</param>
 public sealed record UIToolbarItem(
-    string Name, string Title, int Line, string? Image = null, UIToolbarPlacement Placement = UIToolbarPlacement.End);
+    string Name, string Title, int Line, string? Image = null, UIToolbarPlacement Placement = UIToolbarPlacement.End,
+    string? Tab = null);
+
+/// <summary>
+/// A set of controls and visuals that a toolbar item shows in place of the other tabs', as a sidebar's row shows a
+/// pane. A tab has no title: the item that names it gives its text. Its controls and visuals sit inside it, and name
+/// it in their <c>Tab</c>; tabs only nest.
+/// </summary>
+public sealed record UITab(string Name, int Line);
 
 /// <summary>Which end of the title bar a toolbar item sits at, as GNOME's header bars pack them.</summary>
 public enum UIToolbarPlacement
@@ -491,6 +502,9 @@ public sealed class UIScript
     /// <summary>The sidebar's panes, in document order, which is the sidebar's.</summary>
     public IReadOnlyList<UIPane> Panes { get; private init; } = [];
 
+    /// <summary>The tabs the toolbar switches, in document order; the first starts selected.</summary>
+    public IReadOnlyList<UITab> Tabs { get; private init; } = [];
+
     /// <summary>The status item, for a document whose root is <c>&lt;StatusItem&gt;</c>, or <see langword="null"/>.</summary>
     public UIStatusItem? StatusItem { get; private init; }
 
@@ -594,6 +608,8 @@ public sealed class UIScript
         UITitleField? titleField = null;
         UISidebar? sidebar = null;
         List<UIPane> panes = [];
+        Dictionary<int, string> tabNames = [];
+        List<UITab> tabs = [];
 
         // Each grid's element, and where it is among the controls, so its items, which follow it, join it.
         Dictionary<int, int> grids = [];
@@ -602,10 +618,12 @@ public sealed class UIScript
         {
             var element = document.Children[at];
 
-            // Only a menu, a pane, a sidebar, and a grid hold elements: a menu its items, separators, and submenus, a
-            // pane or a sidebar its controls and visuals, and a grid its items. Everything else sits in <UIScript>.
+            // Only a menu, a pane, a tab, a sidebar, and a grid hold elements: a menu its items, separators, and
+            // submenus, a pane, a tab, or a sidebar its controls and visuals, and a grid its items. Everything else sits
+            // in <UIScript>.
             MenuDraft? holder = null;
             string? inPane = null;
+            string? inTab = null;
             var inSidebar = false;
             var inGrid = -1;
             if (element.Parent != FlatXmlDocument.RootIndex)
@@ -619,6 +637,9 @@ public sealed class UIScript
                     case "Pane" when element.Name == "Visual" || ControlType(element.Name) is not null:
                         inPane = paneNames[element.Parent];
                         break;
+                    case "Tab" when element.Name == "Visual" || ControlType(element.Name) is not null:
+                        inTab = tabNames[element.Parent];
+                        break;
                     case "Sidebar" when element.Name == "Visual" || ControlType(element.Name) is not null:
                         inSidebar = true;
                         break;
@@ -631,9 +652,10 @@ public sealed class UIScript
                             {
                                 "Menu" => $"<{element.Name}> can't be inside <Menu>; a menu holds menu items, separators, and submenus.",
                                 "Pane" => $"<{element.Name}> can't be inside <Pane>; a pane holds controls and visuals.",
+                                "Tab" => $"<{element.Name}> can't be inside <Tab>; a tab holds controls and visuals.",
                                 "Sidebar" => $"<{element.Name}> can't be inside <Sidebar>; a sidebar holds controls and visuals.",
                                 "Grid" => $"<{element.Name}> can't be inside <Grid>; a grid holds items.",
-                                _ => $"<{element.Name}> can't be inside <{parent.Name}>; only a <Menu>, a <Pane>, a <Sidebar>, or a <Grid> holds other elements.",
+                                _ => $"<{element.Name}> can't be inside <{parent.Name}>; only a <Menu>, a <Pane>, a <Tab>, a <Sidebar>, or a <Grid> holds other elements.",
                             },
                             element.Line);
                 }
@@ -689,7 +711,7 @@ public sealed class UIScript
 
                 case "Visual":
                     visuals.Add(new UIVisual(
-                        reader.RequiredString("name"), reader.RequiredString("image"), ReadFrame(reader), element.Line, inPane, inSidebar));
+                        reader.RequiredString("name"), reader.RequiredString("image"), ReadFrame(reader), element.Line, inPane, inSidebar, inTab));
                     break;
 
                 case "Menu":
@@ -733,8 +755,17 @@ public sealed class UIScript
                             "start" => UIToolbarPlacement.Start,
                             var other => throw new UIScriptException(
                                 $"A toolbar item's placement is start or end, not \"{other}\".", element.Line),
-                        }));
+                        },
+                        reader.String("tab")));
                     break;
+
+                case "Tab":
+                {
+                    var tab = new UITab(reader.RequiredString("name"), element.Line);
+                    tabs.Add(tab);
+                    tabNames[at] = tab.Name;
+                    break;
+                }
 
                 case "TitleField":
                     if (titleField is not null)
@@ -786,9 +817,22 @@ public sealed class UIScript
                     if (ControlType(element.Name) is not { } type)
                         throw new UIScriptException($"<{element.Name}> isn't a UIScript element.", element.Line);
 
+                    // Tabs only nest, so a control that names one would read as on every tab in a reader that
+                    // skipped the attribute; it's refused instead.
+                    if (element["tab"] is not null)
+                        throw new UIScriptException(
+                            $"<{element.Name}> has tab, but a tab holds its controls; put it inside the <Tab>.", element.Line);
+
                     // A control in a pane is in it; one written flat names its pane, which mustn't also hold controls.
                     var control = ReadControl(type, reader, element.Line);
-                    if (inPane is not null)
+                    if (inTab is not null)
+                    {
+                        if (control.Pane is not null)
+                            throw new UIScriptException(
+                                $"\"{control.Name}\" is inside the tab \"{inTab}\", so it can't also be in a pane.", element.Line);
+                        control = control with { Tab = inTab };
+                    }
+                    else if (inPane is not null)
                     {
                         if (control.Pane is not null)
                             throw new UIScriptException(
@@ -844,6 +888,7 @@ public sealed class UIScript
             TitleField = titleField,
             Sidebar = sidebar,
             Panes = panes,
+            Tabs = tabs,
             StatusItem = statusItem,
             IgnoredAttributes = ignored,
             Appearance = appearance,
@@ -868,6 +913,8 @@ public sealed class UIScript
             throw new UIScriptException("A status item has no title bar, so no title field.", field.Line);
         if (Sidebar is { } side)
             throw new UIScriptException("A status item can't have a sidebar.", side.Line);
+        if (Tabs.Count > 0)
+            throw new UIScriptException("A status item has no title bar, so no tabs.", Tabs[0].Line);
         if (status.Image is { } image && !HasImage(image))
             throw new UIScriptException($"The status item \"{status.Name}\" shows the image \"{image}\", which isn't an <Image>.", status.Line);
 
@@ -889,6 +936,8 @@ public sealed class UIScript
             throw new UIScriptException("A panel has no title bar, so no title field.", field.Line);
         if (Sidebar is { } side)
             throw new UIScriptException("A panel can't have a sidebar.", side.Line);
+        if (Tabs.Count > 0)
+            throw new UIScriptException("A panel has no title bar, so no tabs.", Tabs[0].Line);
     }
 
     private static UIControlType? ControlType(string element) => element switch
@@ -1173,6 +1222,8 @@ public sealed class UIScript
         }
         foreach (var pane in Panes)
             Unique(names, pane.Name, pane.Line);
+        foreach (var tab in Tabs)
+            Unique(names, tab.Name, tab.Line);
         // A submenu's name is its entry's, so it's counted once, however deep.
         foreach (var menu in Menus)
         {
@@ -1198,6 +1249,20 @@ public sealed class UIScript
         {
             if (item.Image is { } itemImage && !HasImage(itemImage))
                 throw Unknown(item.Name, "image", itemImage, item.Line);
+            if (item.Tab is { } itemTab && !Tabs.Any(tab => tab.Name == itemTab))
+                throw Unknown(item.Name, "tab", itemTab, item.Line);
+        }
+
+        // Exactly one item switches each tab: with none it could never show, and with two the toolbar would show it twice.
+        foreach (var tab in Tabs)
+        {
+            var switching = ToolbarItems.Count(item => item.Tab == tab.Name);
+            if (switching == 0)
+                throw new UIScriptException(
+                    $"No toolbar item names the tab \"{tab.Name}\" with tab, so it could never be shown.", tab.Line);
+            if (switching > 1)
+                throw new UIScriptException(
+                    $"More than one toolbar item names the tab \"{tab.Name}\"; each tab has exactly one.", tab.Line);
         }
 
         foreach (var visual in Visuals)

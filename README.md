@@ -9,8 +9,8 @@ Depot's own, its light twin, or Hudini's standard one. You design on the canvas,
 the text, which you can always edit by hand. It edits and saves UIScript (`.uix`) documents, and shows Maxis
 `.uis` files without changing them.
 
-Depot holds documents to the part of UIScript Hudini reads: no menus, sidebars, panes, shelves, grids, or status
-items. A document that has one opens as text only, saying why, until it's taken out.
+Depot holds documents to the part of UIScript Hudini reads: no menus, shelves, grids, or status items, and a sidebar
+only of panes. A document that has something else opens as text only, saying why, until it's taken out.
 
 ## Using Depot
 

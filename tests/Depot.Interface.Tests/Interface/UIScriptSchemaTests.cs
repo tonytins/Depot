@@ -69,8 +69,9 @@ public sealed class UIScriptSchemaTests
             // An item reads inside a grid, and shows a title when the probe gives it nothing else to show.
             "StatusItem" => $"""<UIScript><Image name="img" path="img.png"/><StatusItem {(attribute == "name" ? "" : """name="s" """)}{(attribute is "title" or "image" ? "" : """title="t" """)}{probe}/></UIScript>""",
             "Item" => $"""<UIScript><Window width="300" height="200"/>{Declarations}<Grid name="g" x="0" y="0" width="100" height="100" itemWidth="20" itemHeight="20"><Item {(attribute is "title" or "string" or "image" or "color" ? "" : """title="t" """)}{probe}/></Grid></UIScript>""",
-            // A probed sidebar stands in for the declared one, which panes still need.
-            _ => $"""<UIScript requires="menus sidebar shelf panes"><Window width="300" height="200"/>{(element == "Sidebar" ? Declarations.Replace(DeclaredSidebar, "", StringComparison.Ordinal) : Declarations)}<{element} {Required(element, attribute)}{probe}/></UIScript>""",
+            // A probed sidebar stands in for the declared one, which panes still need. A tab needs exactly one item
+            // naming it, so a probed tab gets one, and a probed item's tab is declared.
+            _ => $"""<UIScript requires="menus sidebar shelf panes"><Window width="300" height="200"/>{(element == "Sidebar" ? Declarations.Replace(DeclaredSidebar, "", StringComparison.Ordinal) : Declarations)}<{element} {Required(element, attribute)}{probe}/>{TabPartner(element, attribute)}</UIScript>""",
         };
 
         var script = UIScript.Parse(text);
@@ -100,7 +101,7 @@ public sealed class UIScriptSchemaTests
     {
         Assert.Equal(
             ["Button", "FormattedText", "Grid", "Image", "Item", "List", "Menu", "MenuItem", "MenuSeparator", "Pane", "Panel", "ProgressBar", "Region", "Shelf",
-                "Sidebar", "Slider", "StatusItem", "String", "Style", "Text", "TextArea", "TextField", "TitleField", "ToolbarItem", "UIScript",
+                "Sidebar", "Slider", "StatusItem", "String", "Style", "Tab", "Text", "TextArea", "TextField", "TitleField", "ToolbarItem", "UIScript",
                 "Visual", "Window"],
             UIScriptSchema.Elements.Order(StringComparer.Ordinal));
         Assert.All(UIScriptSchema.Controls, control => Assert.NotNull(UIScriptSchema.Find(control, "x")));
@@ -147,6 +148,14 @@ public sealed class UIScriptSchemaTests
 
     private static string Companion(string element, string attribute) => Companions.GetValueOrDefault(attribute, "");
 
+    // What a probed tab or a probed item's tab needs beside it: the one item that names the tab, or the tab named.
+    private static string TabPartner(string element, string attribute) => (element, attribute) switch
+    {
+        ("Tab", _) => """<ToolbarItem name="ti" title="T" tab="probe"/>""",
+        ("ToolbarItem", "tab") => """<Tab name="tb"/>""",
+        _ => "",
+    };
+
     private static string Sample(UIAttributeInfo info) => Samples.TryGetValue(info.Name, out var sample) ? sample : info.Kind switch
     {
         UIAttributeKind.Name => "probe",
@@ -164,6 +173,7 @@ public sealed class UIScriptSchemaTests
             "Image" => "img",
             "Menu" => "m",
             "Pane" => "pn",
+            "Tab" => "tb",
             _ => "l",
         },
         UIAttributeKind.Hotkey => "q",

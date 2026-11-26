@@ -8,14 +8,14 @@ public sealed class HudiniSubsetTests
     [Fact]
     public void LeavesOutWhatTheSpecSaysHudiniRefuses()
     {
-        foreach (var outside in (string[])["Menu", "MenuItem", "MenuSeparator", "Sidebar", "Pane", "Shelf", "Grid", "Item", "StatusItem"])
+        foreach (var outside in (string[])["Menu", "MenuItem", "MenuSeparator", "Shelf", "Grid", "Item", "StatusItem"])
         {
             Assert.DoesNotContain(outside, HudiniSubset.Elements);
             Assert.Empty(HudiniSubset.For(outside));
         }
 
         Assert.Equal(["Text", "FormattedText", "Button", "TextField", "TextArea", "List", "ProgressBar", "Slider", "Region"], HudiniSubset.Controls);
-        foreach (var inside in (string[])["UIScript", "Window", "Panel", "Image", "String", "Style", "Visual", "ToolbarItem", "TitleField"])
+        foreach (var inside in (string[])["UIScript", "Window", "Panel", "Image", "String", "Style", "Visual", "ToolbarItem", "TitleField", "Sidebar", "Pane", "Tab"])
             Assert.Contains(inside, HudiniSubset.Elements);
     }
 
@@ -23,8 +23,7 @@ public sealed class HudiniSubsetTests
     [InlineData("Window", "subtitle")]
     [InlineData("ToolbarItem", "image")]
     [InlineData("ToolbarItem", "placement")]
-    [InlineData("Button", "pane")]
-    [InlineData("Slider", "pane")]
+    [InlineData("Sidebar", "edge")]
     public void SkipsWhatHudiniSkips(string element, string attribute)
     {
         Assert.True(HudiniSubset.Skips(element, attribute));
@@ -36,10 +35,10 @@ public sealed class HudiniSubsetTests
     public void KeepsTheRestOfAnElementsAttributes()
     {
         Assert.False(HudiniSubset.Skips("Window", "width"));
-        Assert.Equal(
-            UIScriptSchema.For("Slider").Count - 1,
-            HudiniSubset.For("Slider").Count);
+        Assert.Equal(UIScriptSchema.For("Slider").Count, HudiniSubset.For("Slider").Count);
         Assert.Contains(HudiniSubset.For("Slider"), info => info.Name == "step");
+        Assert.Contains(HudiniSubset.For("Slider"), info => info.Name == "pane");
+        Assert.Contains(HudiniSubset.For("ToolbarItem"), info => info.Name == "tab");
     }
 
     [Fact]

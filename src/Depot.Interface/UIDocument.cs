@@ -185,8 +185,9 @@ public sealed class UIDocument
 
     /// <summary>
     /// Moves the element at <paramref name="element"/>, with everything inside it, into <paramref name="parent"/>,
-    /// after everything already there, such as an item into a menu or a control into a pane. Its lines are indented
-    /// as the parent's children are, and a <c>menu</c> or <c>pane</c> that named the parent from outside goes.
+    /// after everything already there, such as an item into a menu or a control into a pane or a tab. Its lines are
+    /// indented as the parent's children are, and a <c>menu</c> or <c>pane</c> that named the parent from outside
+    /// goes, as does a <c>pane</c> on a control moving into a tab.
     /// </summary>
     /// <returns>The edited document, and the element's index in it; this one is unchanged.</returns>
     /// <exception cref="InvalidOperationException">The document can only be edited as text; see <see cref="Problem"/>.</exception>
@@ -201,10 +202,11 @@ public sealed class UIDocument
         // text between the two steps is only read as XML, since it can lack something UIScript needs.
         if (element >= 0 && element < xml.Children.Count && parent >= 0 && parent < xml.Children.Count)
         {
+            // A tab names no attribute, but a control in one can't be in a pane, so a pane it named goes.
             var naming = xml.Children[parent].Name switch
             {
                 "Menu" => "menu",
-                "Pane" => "pane",
+                "Pane" or "Tab" => "pane",
                 _ => null,
             };
             if (naming is not null && xml.Children[element][naming] is not null)
