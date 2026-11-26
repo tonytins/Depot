@@ -36,6 +36,22 @@ public sealed class HudiniAppearanceTests
         Assert.False(HudiniAppearance.Parse("<Appearance/>").HasScrollBar);
     }
 
+    [Fact]
+    public void ReadsAnAppearanceWithFonts()
+    {
+        // Hudini's demo appearance names Comic Neue and makes it the default font.
+        var appearance = HudiniAppearance.Parse("""
+            <Appearance version="1">
+              <Font name="comicNeue" path="fonts/ComicNeue-Regular.ttf" size="32"/>
+              <Fonts default="comicNeue"/>
+              <Style name="tile" font="comicNeue"/>
+            </Appearance>
+            """);
+
+        Assert.Equal(["tile"], appearance.StyleNames);
+        Assert.Empty(appearance.ImageNames);
+    }
+
     [Theory]
     [InlineData("<UIScript version=\"1\"/>", "root element must be <Appearance>")]
     [InlineData("<Appearance version=\"2\"/>", "appearance version 2")]
@@ -45,6 +61,11 @@ public sealed class HudiniAppearanceTests
     [InlineData("<Appearance><Image name=\"a\" path=\"a.png\"/><Image name=\"a\" path=\"b.png\"/></Appearance>", "more than one <Image>")]
     [InlineData("<Appearance><ScrollBar/><ScrollBar/></Appearance>", "at most one <ScrollBar>")]
     [InlineData("<Appearance><Style textColor=\"#000000\"/></Appearance>", "<Style> needs a name")]
+    [InlineData("<Appearance><Font path=\"a.ttf\" size=\"9\"/></Appearance>", "<Font> needs a name")]
+    [InlineData("<Appearance><Font name=\"a\" path=\"a.ttf\" size=\"9\"/><Font name=\"a\" path=\"b.ttf\" size=\"9\"/></Appearance>", "more than one <Font>")]
+    [InlineData("<Appearance><Font name=\"monospace\" path=\"a.ttf\" size=\"9\"/></Appearance>", "can't be called \"monospace\"")]
+    [InlineData("<Appearance><Fonts/><Fonts/></Appearance>", "at most one <Fonts>")]
+    [InlineData("<Appearance><Style name=\"s\"><Font name=\"f\" path=\"f.ttf\" size=\"9\"/></Style></Appearance>", "<Font> doesn't belong there")]
     public void RefusesWhatHudiniRefuses(string text, string reason)
     {
         var exception = Assert.Throws<UIScriptException>(() => HudiniAppearance.Parse(text));

@@ -21,7 +21,7 @@ depot-render <document> --output <file.png> [--theme depot|depot-light|standard]
 | `--theme` | The look: `depot` (the default), `depot-light`, or `standard`, Hudini's own. These are Hudini's `InterfaceTheme.depot`, `.depotLight`, and `.standard`. |
 | `--title` | The title a window's bar shows. Defaults to the document's file name. |
 | `--format` | How the document is written. Defaults to `uis` for a `.uis` file, and `uix` for anything else. |
-| `--appearance` | A Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances) the document is read with, as a game reads its windows: its images and styles, which the document may name without declaring, and its scroll bar art. A `.uis` file is read without it. |
+| `--appearance` | A Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances) the document is read with, as a game reads its windows: its images, styles, and fonts, which the document may name without declaring, and its scroll bar art. A `.uis` file is read without it. |
 
 It prints the [frame map](#the-frame-map) on standard output, and anything wrong on standard error.
 
@@ -98,7 +98,9 @@ Toolbar items and the title field aren't in `elements`, since Hudini doesn't say
 ## Limits
 
 - A document is read only up to 4 MiB, and a picture is from 1 to 8192 pixels on each side.
-- Text is drawn in raylib's default font; a game loads its own.
+- Text is drawn in raylib's default font, unless the appearance names
+  [fonts](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#fonts), whose paths are read as files relative
+  to the appearance's folder. A font that isn't found draws in the theme's font.
 - String references show their table and index, as Hudini shows a string its host can't find.
 - Image paths are read as files relative to `directory`, then to the appearance's folder, where an appearance's own
   images are. Images that aren't found are outlined in red.

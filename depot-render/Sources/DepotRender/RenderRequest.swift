@@ -54,8 +54,11 @@ public struct RenderRequest: Codable, Sendable, Equatable {
         public let theme: InterfaceTheme
         public let title: String
         public let imageDirectory: URL?
-        /// The appearance's folder, where its images are looked for when the document's folder hasn't them.
+        /// The appearance's folder, where its images are looked for when the document's folder hasn't them, and
+        /// its fonts are.
         public let appearanceDirectory: URL?
+        /// The appearance the document was read with, whose fonts it draws in, or `nil` for none or a `.uis` file.
+        public let appearance: Appearance?
         public let output: URL
     }
 
@@ -109,6 +112,7 @@ public struct RenderRequest: Codable, Sendable, Equatable {
             imageDirectory: directory.map { URL(fileURLWithPath: $0, isDirectory: true) }
                 ?? pathURL?.deletingLastPathComponent(),
             appearanceDirectory: appearanceURL?.deletingLastPathComponent(),
+            appearance: format == .uis ? nil : shared,
             output: URL(fileURLWithPath: output)
         )
     }

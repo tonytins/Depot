@@ -41,15 +41,35 @@ public final class Renderer {
 
         var textures: [Texture2D] = []
         defer { textures.forEach(UnloadTexture) }
-        let view = UIView(script: resolved.script, theme: resolved.theme, loadImage: { resource in
-            // An inherited image is relative to the appearance's folder, a window's own to the document's.
-            guard let texture = Self.loadTexture(resource, in: resolved.imageDirectory)
-                ?? Self.loadTexture(resource, in: resolved.appearanceDirectory) else {
+        // The appearance's fonts, loaded once for the theme and the view and unloaded after drawing. They're read
+        // again for every document, so a font file changed on disk shows on the next draw.
+        var fonts: [UIScript.FontResource: Font] = [:]
+        defer { fonts.values.forEach(UnloadFont) }
+        let loadFont = { (resource: UIScript.FontResource) -> Font? in
+            if let font = fonts[resource] {
+                return font
+            }
+            guard let font = Self.loadFont(resource, in: resolved.appearanceDirectory) else {
                 return nil
             }
-            textures.append(texture)
-            return texture
-        })
+            fonts[resource] = font
+            return font
+        }
+        let theme = resolved.appearance.map { resolved.theme.withFonts(from: $0, loadFont: loadFont) } ?? resolved.theme
+        let view = UIView(
+            script: resolved.script,
+            theme: theme,
+            loadImage: { resource in
+                // An inherited image is relative to the appearance's folder, a window's own to the document's.
+                guard let texture = Self.loadTexture(resource, in: resolved.imageDirectory)
+                    ?? Self.loadTexture(resource, in: resolved.appearanceDirectory) else {
+                    return nil
+                }
+                textures.append(texture)
+                return texture
+            },
+            loadFont: loadFont
+        )
         let map = try FrameMap(script: resolved.script, view: view)
 
         let target = LoadRenderTexture(Int(map.width), Int(map.height))
@@ -66,7 +86,7 @@ public final class Renderer {
             WindowFrame(view: view, title: resolved.title).draw(in: bounds)
         case .panel:
             // The game draws a panel's background; this is the plain one Hudini's demos use.
-            DrawRectangleRec(bounds, resolved.theme.panel)
+            DrawRectangleRec(bounds, theme.panel)
             view.draw(at: Vector2(x: 0, y: 0))
         }
         EndTextureMode()
@@ -79,6 +99,23 @@ public final class Renderer {
             throw RenderError.drawingFailed("raylib couldn't write \(resolved.output.path)")
         }
         return map
+    }
+
+    // A font path is the host's to interpret; depot-render reads it as a file, relative to the appearance's folder.
+    // Mipmaps keep thin strokes when text is drawn smaller than the font is loaded, as Hudini's demo does.
+    private static func loadFont(_ resource: UIScript.FontResource, in directory: URL?) -> Font? {
+        let url = resource.path.hasPrefix("/") ? URL(fileURLWithPath: resource.path)
+            : directory?.appendingPathComponent(resource.path)
+        guard let url, FileManager.default.isReadableFile(atPath: url.path) else {
+            return nil
+        }
+        var font = LoadFontEx(url.path, Int32(resource.size), nil, 0)
+        guard IsFontValid(font) else {
+            return nil
+        }
+        GenTextureMipmaps(&font.texture)
+        SetTextureFilter(font.texture, .trilinear)
+        return font
     }
 
     // An image path is the host's to interpret; depot-render reads it as a file, relative to a folder.

@@ -8,8 +8,10 @@ namespace Depot.Interface;
 /// </summary>
 /// <remarks>
 /// Depot reads only what it needs to hold a window to what Hudini reads: the names of the appearance's images and
-/// styles, which a window may use without defining. Everything else about the file, such as its colors and its scroll
-/// bar's numbers, Hudini checks when depot-render draws with it, so the two can't disagree.
+/// styles, which a window may use without defining. Everything else about the file, such as its colors, its scroll
+/// bar's numbers, and its fonts, Hudini checks when depot-render draws with it, so the two can't disagree. Depot
+/// still refuses what it can see is wrong with a font's or <c>&lt;Fonts&gt;</c>'s place in the file, as it does for
+/// the other elements; see Hudini's <c>docs/design/2026-11-25-fonts.md</c>.
 /// </remarks>
 public sealed class HudiniAppearance
 {
@@ -62,7 +64,9 @@ public sealed class HudiniAppearance
 
         HashSet<string> images = new(StringComparer.Ordinal);
         HashSet<string> styles = new(StringComparer.Ordinal);
+        HashSet<string> fonts = new(StringComparer.Ordinal);
         var scrollBars = 0;
+        var fontSlots = 0;
         foreach (var element in document.Children)
         {
             if (element.Parent != FlatXmlDocument.RootIndex)
@@ -78,6 +82,17 @@ public sealed class HudiniAppearance
                 case "ScrollBar":
                     if (++scrollBars > 1)
                         throw new UIScriptException("An appearance has at most one <ScrollBar>.", element.Line);
+                    break;
+                case "Font":
+                    // A style's font means the theme's fonts by these names.
+                    if (element["name"] is "interface" or "monospace")
+                        throw new UIScriptException(
+                            $"A <Font> can't be called \"{element["name"]}\", which a style's font already means.", element.Line);
+                    Add(fonts, element);
+                    break;
+                case "Fonts":
+                    if (++fontSlots > 1)
+                        throw new UIScriptException("An appearance has at most one <Fonts>.", element.Line);
                     break;
                 default:
                     throw Misplaced(element.Name, element.Line);
@@ -104,5 +119,5 @@ public sealed class HudiniAppearance
     }
 
     private static UIScriptException Misplaced(string name, int line) =>
-        new($"<{name}> doesn't belong there: an appearance holds <Image>, <Style>, and <ScrollBar>, directly under its root.", line);
+        new($"<{name}> doesn't belong there: an appearance holds <Image>, <Style>, <Font>, <Fonts>, and <ScrollBar>, directly under its root.", line);
 }
