@@ -21,7 +21,7 @@ When the look changes, change it in Hudini, in Depot's `App.axaml`, and here, to
   color. Depot's dark surfaces keep CityLimits' blue-slate, since that's the character of the games Hudini was made
   for. The light look is Adwaita's neutral.
 - **Quieter text is stronger.** The HIG draws secondary text at 55% of the text color. Depot draws it at 58% in the
-  dark look and 68% in the light, so small text reaches 4.5:1 on every surface, the title bar included. Borders are
+  dark look and 70% in the light, so small text reaches 4.5:1 on every surface, the title bar included. Borders are
   20%, as in the HIG.
 - **The selection on the canvas is GNOME blue**, not the accent, so it reads over amber and over any look a document
   is drawn in.

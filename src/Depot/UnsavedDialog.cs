@@ -43,7 +43,7 @@ public sealed class UnsavedDialog : Window
             Children =
             {
                 new TextBlock { Text = $"Save the changes to {name}?", FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
-                new TextBlock { Text = "If you don't, they're lost.", TextWrapping = Avalonia.Media.TextWrapping.Wrap, Opacity = 0.75 },
+                new TextBlock { Text = "If you don't, they're lost.", Classes = { "secondary" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
                 new StackPanel
                 {
                     Orientation = Orientation.Horizontal,

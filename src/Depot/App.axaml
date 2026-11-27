@@ -5,15 +5,72 @@
   <!--
     Depot wears the look it gives new documents, Hudini's depot and depotLight themes: slate and amber, softened
     after Adwaita. The colors are the themes' own; change them together.
+
+    Depot draws with the Venture Design Language's roles (Foundations ▸ Color roles and Type), keyed by the role's
+    name, so a control asks for secondaryText, not a color. Fluent's palette below draws Fluent's own controls and
+    must agree with the roles; LookTests checks both, and that every role reads on every surface.
   -->
   <Application.Resources>
-    <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
-    <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="text" Color="#E4E8EE"/>
+          <!-- 58%, 50%, and 20% of text, so they're quieter on whatever surface they're over. -->
+          <SolidColorBrush x:Key="secondaryText" Color="#94E4E8EE"/>
+          <SolidColorBrush x:Key="disabledText" Color="#80E4E8EE"/>
+          <SolidColorBrush x:Key="highlightedText" Color="#12151B"/>
+          <SolidColorBrush x:Key="accent" Color="#F0BE5A"/>
+          <SolidColorBrush x:Key="panel" Color="#1A1E26"/>
+          <SolidColorBrush x:Key="inputBackground" Color="#12151B"/>
+          <SolidColorBrush x:Key="border" Color="#33E4E8EE"/>
+          <!-- The accent mixed 35% into inputBackground, as VentureOS mixes it on dark. -->
+          <SolidColorBrush x:Key="selection" Color="#605031"/>
+          <!-- Depot's own: the bars above and below the editor and canvas, and behind the canvas. -->
+          <SolidColorBrush x:Key="headerBar" Color="#262B34"/>
+          <SolidColorBrush x:Key="canvasBackground" Color="#1F232B"/>
+          <SolidColorBrush x:Key="errorText" Color="#E86A60"/>
+          <!-- The States table's hover and press: text at 7% and 16%. -->
+          <SolidColorBrush x:Key="hover" Color="#12E4E8EE"/>
+          <SolidColorBrush x:Key="pressed" Color="#29E4E8EE"/>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="text" Color="#333338"/>
+          <!-- 70%, 50%, and 20% of text. 70%, not the system's 55%, so small text reaches 4.5 to 1 behind the canvas. -->
+          <SolidColorBrush x:Key="secondaryText" Color="#B3333338"/>
+          <SolidColorBrush x:Key="disabledText" Color="#80333338"/>
+          <SolidColorBrush x:Key="highlightedText" Color="#12151B"/>
+          <!-- Amber darkened, so it stands out from white. -->
+          <SolidColorBrush x:Key="accent" Color="#B07A0E"/>
+          <SolidColorBrush x:Key="panel" Color="#FAFAFB"/>
+          <SolidColorBrush x:Key="inputBackground" Color="#FFFFFF"/>
+          <SolidColorBrush x:Key="border" Color="#33333338"/>
+          <!-- The accent mixed 30% into inputBackground, as VentureOS mixes it on light. -->
+          <SolidColorBrush x:Key="selection" Color="#E7D7B7"/>
+          <SolidColorBrush x:Key="headerBar" Color="#FFFFFF"/>
+          <SolidColorBrush x:Key="canvasBackground" Color="#F2F2F3"/>
+          <SolidColorBrush x:Key="errorText" Color="#C01C28"/>
+          <SolidColorBrush x:Key="hover" Color="#12333338"/>
+          <SolidColorBrush x:Key="pressed" Color="#29333338"/>
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+
+      <!-- The type roles, at Depot's sizes: VentureOS's, with caption at Hudini's 12 for the compact inspector. -->
+      <x:Double x:Key="captionSize">12</x:Double>
+      <x:Double x:Key="bodySize">13</x:Double>
+      <x:Double x:Key="titleSize">17</x:Double>
+      <x:Double x:Key="largeTitleSize">22</x:Double>
+      <!-- Fluent's controls draw their text at body. -->
+      <x:Double x:Key="ControlContentThemeFontSize">13</x:Double>
+
+      <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
+      <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+    </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
     <!-- Compact, as Roundhouse is: more of the document fits beside the canvas. -->
     <FluentTheme DensityStyle="Compact">
       <FluentTheme.Palettes>
+        <!-- Accent, RegionColor, BaseHigh, and ErrorText are the roles accent, panel, text, and errorText. -->
         <ColorPaletteResources x:Key="Dark"
                                Accent="#F0BE5A"
                                RegionColor="#1A1E26"
@@ -59,13 +116,56 @@
       </FluentTheme.Palettes>
     </FluentTheme>
     <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml"/>
+
     <!-- The bars above and below the editor and canvas, a step from the window, as Hudini's title bar is. -->
     <Style Selector="Border.bar">
-      <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource headerBar}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource border}"/>
+    </Style>
+    <Style Selector="GridSplitter">
+      <Setter Property="Background" Value="{DynamicResource border}"/>
+    </Style>
+
+    <!-- Text in the roles. A TextBlock takes one color class and, if it isn't body, one size class. -->
+    <Style Selector="TextBlock.secondary">
+      <Setter Property="Foreground" Value="{DynamicResource secondaryText}"/>
     </Style>
     <Style Selector="TextBlock.problem">
-      <Setter Property="Foreground" Value="{DynamicResource SystemControlErrorTextForegroundBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource errorText}"/>
+    </Style>
+    <Style Selector="TextBlock.caption">
+      <Setter Property="FontSize" Value="{DynamicResource captionSize}"/>
+    </Style>
+    <!-- A pane's or a group's heading: quieter than what it heads, so the eye goes to the content. -->
+    <Style Selector="TextBlock.heading">
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{DynamicResource secondaryText}"/>
+    </Style>
+
+    <!-- List items in the States table's terms: a faint tint under the pointer, a stronger one pressed, and the
+         selection role behind the chosen one. -->
+    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource hover}"/>
+    </Style>
+    <Style Selector="ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource pressed}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource selection}"/>
+      <Setter Property="Foreground" Value="{DynamicResource text}"/>
+    </Style>
+
+    <!-- A button that's turned off says so in disabledText, as the States table has it. -->
+    <Style Selector=":is(Button):disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource disabledText}"/>
+    </Style>
+
+    <!-- The inspector's short fields, as an IDE's property grid has, so more of an element fits without scrolling. -->
+    <Style Selector=":is(TemplatedControl).field">
+      <Setter Property="Height" Value="26"/>
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="FontSize" Value="{DynamicResource captionSize}"/>
+      <Setter Property="Padding" Value="6,0"/>
     </Style>
   </Application.Styles>
 </Application>

@@ -78,9 +78,8 @@ public sealed class InspectorPanel : StackPanel
             Children.Add(new TextBlock
             {
                 Text = "Hudini doesn't read these; they're kept as written.",
+                Classes = { "secondary", "caption" },
                 TextWrapping = TextWrapping.Wrap,
-                Opacity = 0.6,
-                FontSize = 11,
             });
             foreach (var name in others)
                 AddField(new UIAttributeInfo(name, UIAttributeGroup.Behaviour, UIAttributeKind.Text));
@@ -88,7 +87,7 @@ public sealed class InspectorPanel : StackPanel
     }
 
     private void AddHeading(string text) =>
-        Children.Add(new TextBlock { Text = text, FontWeight = FontWeight.SemiBold, Opacity = 0.7, Margin = new(0, 10, 0, 2) });
+        Children.Add(new TextBlock { Text = text, Classes = { "heading" }, Margin = new(0, 10, 0, 2) });
 
     private void AddField(UIAttributeInfo info)
     {
@@ -108,7 +107,7 @@ public sealed class InspectorPanel : StackPanel
     public sealed class Field
     {
         private readonly InspectorPanel panel;
-        private readonly TextBlock problem = new() { Classes = { "problem" }, TextWrapping = TextWrapping.Wrap, FontSize = 11, IsVisible = false };
+        private readonly TextBlock problem = new() { Classes = { "problem", "caption" }, TextWrapping = TextWrapping.Wrap, IsVisible = false };
         private string? value;
 
         internal Field(UIAttributeInfo info, InspectorPanel panel)
@@ -118,7 +117,7 @@ public sealed class InspectorPanel : StackPanel
             var label = new TextBlock
             {
                 Text = info.IsRequired ? $"{info.Name} *" : info.Name,
-                FontSize = 12,
+                Classes = { "caption" },
                 VerticalAlignment = VerticalAlignment.Center,
                 TextTrimming = TextTrimming.CharacterEllipsis,
             };
@@ -177,8 +176,8 @@ public sealed class InspectorPanel : StackPanel
 
         private TextBox MakeTextBox()
         {
-            // Short fields, as an IDE's property grid has, so more of an element fits without scrolling.
-            TextBox box = new() { Height = 26, MinHeight = 0, FontSize = 12, Padding = new(6, 0), VerticalContentAlignment = VerticalAlignment.Center };
+            // Short fields, styled by App.axaml's field class.
+            TextBox box = new() { Classes = { "field" }, VerticalContentAlignment = VerticalAlignment.Center };
             box.LostFocus += (_, _) => CommitText(box);
             box.KeyDown += (_, e) =>
             {
@@ -218,11 +217,8 @@ public sealed class InspectorPanel : StackPanel
             ComboBox box = new()
             {
                 ItemsSource = (List<string>)["(default)", .. choices],
+                Classes = { "field" },
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                Height = 26,
-                MinHeight = 0,
-                FontSize = 12,
-                Padding = new(6, 0),
             };
             box.SelectionChanged += (_, _) =>
             {

@@ -19,7 +19,7 @@
           <Button x:Name="AddButton" Content="Add ▾" IsEnabled="False" ToolTip.Tip="Add a control or a part of the window"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-          <TextBlock Text="Look" VerticalAlignment="Center" Opacity="0.75"/>
+          <TextBlock Text="Look" Classes="secondary" VerticalAlignment="Center"/>
           <ComboBox x:Name="LookPicker" MinWidth="160" ToolTip.Tip="The Hudini theme the canvas draws in"/>
           <Button x:Name="AppearanceButton" Content="No appearance ▾"
                   ToolTip.Tip="The Hudini appearance documents are read with, as a game reads its windows"/>
@@ -37,8 +37,8 @@
                      ShowLineNumbers="True"
                      IsReadOnly="True"
                      Padding="4,4,0,0"/>
-      <GridSplitter Grid.Column="1" ResizeDirection="Columns" Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
-      <Panel Grid.Column="2" Background="{DynamicResource SystemControlBackgroundChromeLowBrush}">
+      <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
+      <Panel Grid.Column="2" Background="{DynamicResource canvasBackground}">
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
           <!-- The picture and, over it, the selection; the host takes the pointer and the keyboard. -->
           <Panel x:Name="CanvasHost" Margin="24" Focusable="True" Background="Transparent"
@@ -47,18 +47,18 @@
             <Canvas x:Name="SelectionLayer" IsHitTestVisible="False" HorizontalAlignment="Left" VerticalAlignment="Top"/>
           </Panel>
         </ScrollViewer>
-        <TextBlock x:Name="CanvasMessage" Margin="32" TextWrapping="Wrap" TextAlignment="Center"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.75"
+        <TextBlock x:Name="CanvasMessage" Classes="secondary" Margin="32" TextWrapping="Wrap" TextAlignment="Center"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
                    Text="No document open"/>
       </Panel>
-      <GridSplitter Grid.Column="3" ResizeDirection="Columns" Background="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+      <GridSplitter Grid.Column="3" ResizeDirection="Columns"/>
       <Grid Grid.Column="4" RowDefinitions="Auto,2*,Auto,3*">
-        <TextBlock Grid.Row="0" Text="Outline" FontWeight="SemiBold" Margin="10,8,10,4" Opacity="0.75"/>
-        <ListBox x:Name="Outline" Grid.Row="1" Margin="4,0" FontSize="12"/>
-        <TextBlock Grid.Row="2" Text="Inspector" FontWeight="SemiBold" Margin="10,10,10,4" Opacity="0.75"/>
+        <TextBlock Grid.Row="0" Text="Outline" Classes="heading" Margin="10,8,10,4"/>
+        <ListBox x:Name="Outline" Grid.Row="1" Margin="4,0" FontSize="{DynamicResource captionSize}"/>
+        <TextBlock Grid.Row="2" Text="Inspector" Classes="heading" Margin="10,10,10,4"/>
         <ScrollViewer Grid.Row="3" Padding="10,0,10,10">
           <StackPanel>
-            <TextBlock x:Name="InspectorHint" TextWrapping="Wrap" Opacity="0.6" FontSize="12" Text="Select an element to see its attributes."/>
+            <TextBlock x:Name="InspectorHint" Classes="secondary caption" TextWrapping="Wrap" Text="Select an element to see its attributes."/>
             <designer:InspectorPanel x:Name="InspectorView"/>
           </StackPanel>
         </ScrollViewer>
