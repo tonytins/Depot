@@ -92,6 +92,20 @@ public sealed class MenuTests : IDisposable
     });
 
     [Fact]
+    public void TheGlobalMenuBarLeavesPlainKeysToTheFocusedControl() => TestApp.Run(() =>
+    {
+        MainWindow window = new(rendererPath: null);
+
+        var edit = NativeMenu.GetMenu(window)!.Items.OfType<NativeMenuItem>().Single(item => item.Header == "Edit").Menu!;
+        var items = edit.Items.OfType<NativeMenuItem>().ToList();
+
+        Assert.Null(items.Single(item => item.Header == "Delete").Gesture);
+        Assert.Equal(new KeyGesture(Key.D, KeyModifiers.Control), items.Single(item => item.Header == "Duplicate").Gesture);
+        // The dropdown still shows Delete's key.
+        Assert.Equal(new KeyGesture(Key.Delete), Command(window, "Edit", "Delete").Gesture);
+    });
+
+    [Fact]
     public void ControlSSavesFromAnywhereInTheWindow() => TestApp.Run(() =>
     {
         MainWindow window = new(rendererPath: null);

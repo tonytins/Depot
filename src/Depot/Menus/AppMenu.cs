@@ -99,7 +99,10 @@ public static class AppMenu
                     Command = new Runner(command.Run),
                     IsEnabled = command.IsEnabled?.Invoke() ?? true,
                 };
-                if (command.Gesture is { } gesture)
+                // A native menu's shortcut is a real one on macOS, taken before the focused control sees the key, so a
+                // plain key such as Delete would stop working in the text editor. The global menu bar only gets
+                // shortcuts with a modifier; the ☰ dropdown, which only shows them, gets all of them.
+                if (command.Gesture is { KeyModifiers: not KeyModifiers.None } gesture)
                     item.Gesture = gesture;
                 if (command.IsChecked is { } isChecked)
                 {
