@@ -8,7 +8,10 @@ changing how Depot and `depot-render` talk, or what Depot holds documents to.
 
 - `src/Depot` is the app, in C# with Avalonia (.NET 10), for Linux, macOS, and Windows. `MainWindow` holds the text
   editor, the canvas, the outline, and the inspector; `Designer/` the designer's logic; `Rendering/` the conversation
-  with `depot-render`; `Documents/` opening and saving files.
+  with `depot-render`; `Documents/` opening and saving files; `Menus/` the menus, shown in the desktop's global menu
+  bar or behind ☰. `WindowTitleBar`, `TitleBarPanel`, and `TitleBars` make the title bar, which is the toolbar.
+  `App.axaml` holds the look; `uitext/english.dir/_100_depot.cst` holds the words, which `Words` reads by the keys
+  in `TextKeys`.
 - `src/Depot.Interface` is Depot's own copy of VentureOS's `Venture.OS.Interface`: the UIScript reader
   (`UIScript.cs`), `UIDocument`, which edits a document's text in place, `UIScriptSchema`, and `HudiniSubset`, which
   narrows them to what Hudini reads. It references nothing but the BCL and CSTNet.
@@ -46,7 +49,7 @@ dotnet run --project src/Depot -- document.uix       # the app, drawing with the
 - Every change to a document, typed or designed, is a change to the editor's text, so Undo takes it back. Designer
   edits go through `UIDocument` and `MainWindow.Apply`, never around them.
 - Unsaved changes are asked about before closing or opening another document.
-- A failure is reported in the status bar, in the HIG's plain voice, and Depot carries on. Don't swallow one, or
+- A failure is reported in the status bar, in the Design Language's plain voice, and Depot carries on. Don't swallow one, or
   show success for something that didn't happen.
 
 ### Stay faithful to Hudini
@@ -57,6 +60,22 @@ dotnet run --project src/Depot -- document.uix       # the app, drawing with the
 - `.uis` files are shown, never written.
 - Where the selection or an element is depends on `depot-render`'s frame map, not on reading `x` and `y` from the
   document.
+
+### Follow the Venture Design Language
+
+Depot follows the [Venture Design Language](https://github.com/tonytins/VentureOS/tree/main/docs/design-language) as an app outside VentureOS, a cousin rather than one of the
+family: its structure, roles, behavior, and voice, in its own paint.
+
+- Draw with the roles in `App.axaml`, such as `secondaryText` or `accent`, not with colors or opacities in code or
+  XAML. A hex color is for something that must be exactly that color, such as the canvas's selection blue, and says
+  why. `LookTests` checks every role is defined on both palettes, reads on every surface, and agrees with Fluent's
+  palette; keep it passing.
+- Depot's dark look is Hudini's `InterfaceTheme.depot`, and its light one `depotLight`, which new documents are drawn
+  in. Change them together.
+- Put words in the table, with a key in `TextKeys`, not in code: labels, menus, tooltips, hints, and messages someone
+  reads. Programmer errors and the text Depot writes into documents stay in code. `WordsTests` keeps the two in step.
+- Commands go in the menus (`MainWindow.BuildMenus`). The title bar keeps only what's used constantly or shows what's
+  in use.
 
 ### Depot.Interface
 
@@ -97,8 +116,6 @@ Describe only what works today.
 - [README.md](README.md) when using, building, or the layout changes.
 - [docs/design.md](docs/design.md) when a decision is made or reversed, with a row in its table.
 - [docs/depot-render.md](docs/depot-render.md) when the command line, the protocol, or the frame map changes.
-- [docs/hig.md](docs/hig.md) when Depot's look changes, together with Hudini's `InterfaceTheme.depot` and Depot's
-  `App.axaml`.
 - This file when the layout or the rules change.
 
 State breaking changes, dependency changes, and anything you couldn't verify in the commit message. If you notice a

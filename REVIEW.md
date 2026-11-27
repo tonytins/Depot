@@ -25,10 +25,12 @@ through Hudini. The rules it checks against are in [AGENTS.md](AGENTS.md).
   `depot-render` hang Depot, or a late answer be shown for the wrong document?
 - **Protocol:** Do older requests and frame maps still work? Is every new field documented in
   [docs/depot-render.md](docs/depot-render.md)? Are requests validated before anything is read or drawn?
+- **Design Language:** Does new interface draw with the roles in `App.axaml`, put its words in the table, and put
+  its commands in the menus? Do `LookTests` and `WordsTests` still pass?
 - **Threads:** Does code that touches Avalonia run on its thread, tests included?
 - **Dependencies:** Are new packages or version bumps called out, approved, and kept in a change of their own?
 - **Tests:** Do focused tests cover the change, and would a new test fail without it?
-- **Docs:** Are the README, design note, `depot-render` reference, look notes, and AGENTS.md updated where affected,
+- **Docs:** Are the README, design note, `depot-render` reference, and AGENTS.md updated where affected,
   and do they describe only what works?
 
 ## Writing review comments

@@ -99,7 +99,8 @@ Both test suites read Hudini's example documents from `tests/Fixtures`. One of D
 
 - [docs/design.md](docs/design.md): how Depot is built, what it leaves out, and the decisions behind it.
 - [docs/depot-render.md](docs/depot-render.md): `depot-render`'s command line, protocol, and frame map.
-- [docs/hig.md](docs/hig.md): Depot's look, and where it differs from the VentureOS HIG.
+- [The Venture Design Language](https://github.com/tonytins/VentureOS/tree/main/docs/design-language): how Depot looks, behaves, and talks. Its colors and type are in
+  `src/Depot/App.axaml`, and its words in `src/Depot/uitext`.
 - [AGENTS.md](AGENTS.md) and [REVIEW.md](REVIEW.md): how to work on Depot, and how changes are reviewed.
 
 ## License
