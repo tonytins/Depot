@@ -11,9 +11,8 @@
     <!-- The title bar, which is the toolbar; where the desktop allows, it's the window's own title bar. -->
     <local:WindowTitleBar x:Name="TitleBar" DockPanel.Dock="Top">
       <local:WindowTitleBar.Start>
-        <Button x:Name="OpenButton" Classes="bar" Content="Open…" HotKey="Ctrl+O" ToolTip.Tip="Open a .uix or .uis document (Ctrl+O)"/>
-        <Button x:Name="SaveButton" Classes="bar" Content="Save" HotKey="Ctrl+S" IsEnabled="False" ToolTip.Tip="Save the document (Ctrl+S)"/>
-        <Border Width="8"/>
+        <!-- The menus, where the desktop has no global menu bar to show them in. -->
+        <Button x:Name="MenuButton" Classes="bar" Content="☰" FontSize="16" ToolTip.Tip="Menu"/>
         <Button x:Name="UndoButton" Classes="bar" Content="Undo" IsEnabled="False" ToolTip.Tip="Undo the last change, typed or designed (Ctrl+Z)"/>
         <Button x:Name="RedoButton" Classes="bar" Content="Redo" IsEnabled="False" ToolTip.Tip="Redo what was undone (Ctrl+Shift+Z)"/>
         <Border Width="8"/>

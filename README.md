@@ -18,7 +18,11 @@ only of panes. A document that has something else opens as text only, saying why
 dotnet run --project src/Depot -- path/to/document.uix
 ```
 
-Open (Ctrl+O) opens another document, and Save (Ctrl+S) saves the text exactly as it's written, even text Hudini
+Depot's commands are in its menus: in the desktop's global menu bar where it has one, such as KDE's or macOS's, and
+behind ☰ at the left of the title bar where it doesn't. The title bar also holds Undo, Redo, Add, the look, and the
+appearance.
+
+File ▸ Open (Ctrl+O) opens another document, and File ▸ Save (Ctrl+S) saves the text exactly as it's written, even text Hudini
 won't read, which the status bar then warns of. The status bar also says what Hudini ignores or can't find, and
 why a document can't be drawn; while it can't, the last picture stays, faded.
 
@@ -33,15 +37,15 @@ On the canvas:
   as it's drawn. The window and panel resize by their right and bottom edges.
 - The arrow keys move by a pixel, with Shift by 8. Delete deletes, Ctrl+D duplicates, and Ctrl+] and Ctrl+[ move
   in front of or behind the next control.
-- Add adds any control Hudini draws, a picture, a toolbar item, or a title field.
+- Add, or the Insert menu, adds any control Hudini draws, a picture, a toolbar item, or a title field.
 - The inspector edits the selection's attributes; an empty field removes one. Attributes Hudini doesn't read are
   kept under Other.
 - Undo (Ctrl+Z) and Redo (Ctrl+Shift+Z) take back any change, typed or designed; a whole drag is one change.
 
 A game can read its windows with a Hudini [appearance](https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md#appearances):
 one file holding the images, styles, and scroll bar art they share. A window that names a shared style or image
-doesn't read without it, so Depot can read and draw documents with one too. Choose it from the Appearance button
-beside Look, or start Depot with it:
+doesn't read without it, so Depot can read and draw documents with one too. Choose it from the appearance button
+in the title bar or View ▸ Appearance, or start Depot with it:
 
 ```sh
 dotnet run --project src/Depot -- --appearance path/to/appearance.xml path/to/document.uix

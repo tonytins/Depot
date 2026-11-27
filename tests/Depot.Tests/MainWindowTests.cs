@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using AvaloniaEdit;
+using Depot.Menus;
 using Depot.Rendering;
 
 namespace Depot.Tests;
@@ -20,6 +21,8 @@ public sealed class MainWindowTests : IDisposable
 
     private static string StatusOf(MainWindow window) => window.Get<TextBlock>("Status").Text ?? "";
 
+    private static bool CanSave(MainWindow window) => AppMenu.Find(window.Menus, "File", "Save")!.IsEnabled!();
+
     [Fact]
     public void OpensAUIScriptDocumentToEdit() => TestApp.Run(() =>
     {
@@ -32,7 +35,7 @@ public sealed class MainWindowTests : IDisposable
         Assert.False(window.Get<TextEditor>("Editor").IsReadOnly);
         Assert.Equal("budget.uix — Depot", window.Title);
         Assert.False(window.HasUnsavedChanges);
-        Assert.False(window.Get<Button>("SaveButton").IsEnabled);
+        Assert.False(CanSave(window));
     });
 
     [Fact]
@@ -46,12 +49,12 @@ public sealed class MainWindowTests : IDisposable
 
         Assert.True(window.HasUnsavedChanges);
         Assert.Equal("budget.uix (edited) — Depot", window.Title);
-        Assert.True(window.Get<Button>("SaveButton").IsEnabled);
+        Assert.True(CanSave(window));
 
         Assert.True(window.Save());
         Assert.Equal("<!-- edited -->\n" + Budget, File.ReadAllText(path));
         Assert.Equal("budget.uix — Depot", window.Title);
-        Assert.False(window.Get<Button>("SaveButton").IsEnabled);
+        Assert.False(CanSave(window));
     });
 
     [Theory]

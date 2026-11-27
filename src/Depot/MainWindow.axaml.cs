@@ -15,6 +15,7 @@ using Depot.Designer;
 using Depot.Documents;
 using Depot.Interface;
 using Depot.Interface.Xml;
+using Depot.Menus;
 using Depot.Rendering;
 using TextMateSharp.Grammars;
 using Path = System.IO.Path;
@@ -35,7 +36,8 @@ public sealed partial class MainWindow : Window
     private static readonly IBrush SelectionBrush = new ImmutableSolidColorBrush(Color.FromRgb(0x35, 0x84, 0xE4));
 
     private readonly TextEditor editor;
-    private readonly Button saveButton;
+    private readonly Button menuButton;
+    private readonly NativeMenu nativeMenu = new();
     private readonly Button undoButton;
     private readonly Button redoButton;
     private readonly Button addButton;
@@ -79,7 +81,7 @@ public sealed partial class MainWindow : Window
     {
         AvaloniaXamlLoader.Load(this);
         editor = this.Get<TextEditor>("Editor");
-        saveButton = this.Get<Button>("SaveButton");
+        menuButton = this.Get<Button>("MenuButton");
         undoButton = this.Get<Button>("UndoButton");
         redoButton = this.Get<Button>("RedoButton");
         addButton = this.Get<Button>("AddButton");
@@ -99,14 +101,32 @@ public sealed partial class MainWindow : Window
 
         lookPicker.ItemsSource = Enum.GetValues<CanvasLook>().Select(look => look.Title()).ToArray();
         lookPicker.SelectedIndex = (int)CanvasLook.Depot;
-        lookPicker.SelectionChanged += (_, _) => RequestPicture();
+        lookPicker.SelectionChanged += (_, _) =>
+        {
+            RequestPicture();
+            RefreshMenus();
+        };
 
-        this.Get<Button>("OpenButton").Click += async (_, _) => await ChooseAndOpenAsync();
-        saveButton.Click += (_, _) => Save();
+        Menus = BuildMenus();
+        NativeMenu.SetMenu(this, nativeMenu);
+        foreach (var (key, modifiers, run) in (ReadOnlySpan<(Key, KeyModifiers, Action)>)
+                 [
+                     (Key.O, KeyModifiers.Control, () => _ = ChooseAndOpenAsync()),
+                     (Key.S, KeyModifiers.Control, () => Save()),
+                     (Key.W, KeyModifiers.Control, Close),
+                     (Key.Q, KeyModifiers.Control, Close),
+                 ])
+        {
+            // Bound to the window, so they act only when the focused control, such as the editor, hasn't already.
+            // Undo, Redo, and the designer's keys are the editor's and the canvas's own (OnCanvasKeyDown).
+            KeyBindings.Add(new KeyBinding { Gesture = new KeyGesture(key, modifiers), Command = AppMenu.Command(run) });
+        }
+
+        menuButton.Click += (_, _) => ShowFlyout(Menus, menuButton, PlacementMode.BottomEdgeAlignedLeft);
         undoButton.Click += (_, _) => Undo();
         redoButton.Click += (_, _) => Redo();
-        addButton.Click += (_, _) => ShowLibrary();
-        appearanceButton.Click += (_, _) => ShowAppearanceChoices();
+        addButton.Click += (_, _) => ShowFlyout(MenuNamed("Insert").Entries, addButton, PlacementMode.BottomEdgeAlignedLeft);
+        appearanceButton.Click += (_, _) => ShowFlyout(AppearanceEntries(), appearanceButton, PlacementMode.BottomEdgeAlignedRight);
 
         redraw = new DispatcherTimer { Interval = RedrawDelay };
         redraw.Tick += (_, _) =>
@@ -237,24 +257,13 @@ public sealed partial class MainWindow : Window
 
         appearance = loaded;
         AppearancePath = fullPath;
+        RefreshMenus();
         appearanceButton.Content = fullPath is null ? "No appearance ▾" : $"Appearance: {System.IO.Path.GetFileName(fullPath)} ▾";
         ToolTip.SetTip(appearanceButton, fullPath ?? "The Hudini appearance documents are read with, as a game reads its windows");
         design = null;
         RequestPicture();
         ShowPanels();
         return true;
-    }
-
-    private void ShowAppearanceChoices()
-    {
-        MenuFlyout choices = new() { Placement = PlacementMode.BottomEdgeAlignedRight };
-        MenuItem choose = new() { Header = "Choose an Appearance…" };
-        choose.Click += async (_, _) => await ChooseAppearanceAsync();
-        MenuItem none = new() { Header = "No Appearance", IsEnabled = AppearancePath is not null };
-        none.Click += (_, _) => UseAppearance(null);
-        choices.Items.Add(choose);
-        choices.Items.Add(none);
-        choices.ShowAt(appearanceButton);
     }
 
     private async Task ChooseAppearanceAsync()
@@ -454,24 +463,6 @@ public sealed partial class MainWindow : Window
             ShowStatus($"Hudini wouldn't read that: {exception.Message}", isProblem: true);
             return false;
         }
-    }
-
-    private void ShowLibrary()
-    {
-        MenuFlyout library = new() { Placement = PlacementMode.BottomEdgeAlignedLeft };
-        foreach (var control in DesignEdits.Library)
-            library.Items.Add(LibraryItem(control.Element, control.Element));
-        library.Items.Add(new Separator());
-        foreach (var (element, title) in DesignEdits.Parts)
-            library.Items.Add(LibraryItem(element, title));
-        library.ShowAt(addButton);
-    }
-
-    private MenuItem LibraryItem(string element, string title)
-    {
-        MenuItem item = new() { Header = title };
-        item.Click += (_, _) => Add(element);
-        return item;
     }
 
     // Commits an inspector change to the selected element, or gives the reason it can't be made.
@@ -720,6 +711,7 @@ public sealed partial class MainWindow : Window
             : "";
         inspectorHint.IsVisible = inspectorHint.Text.Length > 0;
         inspector.Show(editable && Selection is { } element ? xml!.Children[element] : null);
+        RefreshMenus();
     }
 
     /// <summary>An element as the outline lists it: its kind, and its name.</summary>
@@ -878,6 +870,99 @@ public sealed partial class MainWindow : Window
         e.Handled = true;
     }
 
+    /// <summary>Depot's menus, shown in the desktop's global menu bar where it has one, and behind ☰ where it doesn't.</summary>
+    public IReadOnlyList<AppMenuGroup> Menus { get; }
+
+    /// <summary>Where Hudini's guide to UIScript is, which Help opens.</summary>
+    public static readonly Uri GuideAddress = new("https://github.com/tonytins/Hudini/blob/main/docs/UISCRIPT.md");
+
+    private AppMenuGroup MenuNamed(string title) => Menus.Single(group => group.Title == title);
+
+    private List<MenuEntry> AppearanceEntries() =>
+    [
+        new MenuCommand("Choose an Appearance…", () => _ = ChooseAppearanceAsync()),
+        new MenuCommand("No Appearance", () => UseAppearance(null), IsEnabled: () => AppearancePath is not null),
+    ];
+
+    private List<AppMenuGroup> BuildMenus()
+    {
+        bool Writable() => document is { IsReadOnly: false };
+        bool Editable() => Design is { IsEditable: true };
+        bool Selected() => Editable() && Selection is not null;
+        KeyGesture Ctrl(Key key, KeyModifiers more = KeyModifiers.None) => new(key, KeyModifiers.Control | more);
+
+        return
+        [
+            new("File",
+            [
+                new MenuCommand("Open…", () => _ = ChooseAndOpenAsync(), Ctrl(Key.O)),
+                new MenuCommand("Save", () => Save(), Ctrl(Key.S), () => HasUnsavedChanges),
+                new MenuSeparator(),
+                new MenuCommand("Close Window", Close, Ctrl(Key.W)),
+                new MenuCommand("Quit", Close, Ctrl(Key.Q)),
+            ]),
+            new("Edit",
+            [
+                new MenuCommand("Undo", Undo, Ctrl(Key.Z), () => Writable() && editor.CanUndo),
+                new MenuCommand("Redo", Redo, Ctrl(Key.Z, KeyModifiers.Shift), () => Writable() && editor.CanRedo),
+                new MenuSeparator(),
+                new MenuCommand("Duplicate", () => DuplicateSelection(), Ctrl(Key.D), Selected),
+                new MenuCommand("Delete", () => DeleteSelection(), new KeyGesture(Key.Delete), Selected),
+            ]),
+            new("Insert",
+            [
+                .. DesignEdits.Library.Select(control => new MenuCommand(control.Element, () => Add(control.Element), IsEnabled: Editable)),
+                new MenuSeparator(),
+                .. DesignEdits.Parts.Select(part => new MenuCommand(part.Title, () => Add(part.Element), IsEnabled: Editable)),
+            ]),
+            new("Arrange",
+            [
+                new MenuCommand("Bring Forward", () => BringForward(), Ctrl(Key.OemCloseBrackets), Selected),
+                new MenuCommand("Send Backward", () => SendBackward(), Ctrl(Key.OemOpenBrackets), Selected),
+            ]),
+            new("View",
+            [
+                new AppMenuGroup("Look", [.. Enum.GetValues<CanvasLook>().Select(look =>
+                    new MenuCommand(look.Title(), () => Look = look, IsChecked: () => Look == look))]),
+                new AppMenuGroup("Appearance", AppearanceEntries()),
+            ]),
+            new("Help",
+            [
+                new MenuCommand("UIScript Guide", () => _ = OpenGuideAsync()),
+            ]),
+        ];
+    }
+
+    /// <summary>Shows menu entries as they are now, under <paramref name="target"/>.</summary>
+    private static void ShowFlyout(IEnumerable<MenuEntry> entries, Control target, PlacementMode placement)
+    {
+        var flyout = AppMenu.Flyout(entries);
+        flyout.Placement = placement;
+        flyout.ShowAt(target);
+    }
+
+    // The global menu bar holds a copy of the menus, so it's filled again whenever what's enabled or checked changes.
+    // Menus is null only while the constructor builds it.
+    private void RefreshMenus()
+    {
+        if (Menus is not null)
+            AppMenu.Fill(nativeMenu, Menus);
+    }
+
+    private async Task OpenGuideAsync()
+    {
+        if (!await Launcher.LaunchUriAsync(GuideAddress))
+            ShowStatus($"Depot couldn't open {GuideAddress} in a browser.", isProblem: true);
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        // Where the desktop shows the menus in its own menu bar, ☰ would only repeat them.
+        if (change.Property == NativeMenu.IsNativeMenuExportedProperty && menuButton is not null)
+            menuButton.IsVisible = !NativeMenu.GetIsNativeMenuExported(this);
+    }
+
     private void ShowStatus(string message, bool isProblem)
     {
         status.Text = message;
@@ -886,7 +971,7 @@ public sealed partial class MainWindow : Window
 
     private void ShowEdited()
     {
-        saveButton.IsEnabled = HasUnsavedChanges;
+        RefreshMenus();
         undoButton.IsEnabled = editor.CanUndo && document is { IsReadOnly: false };
         redoButton.IsEnabled = editor.CanRedo && document is { IsReadOnly: false };
         ShowTitle();
