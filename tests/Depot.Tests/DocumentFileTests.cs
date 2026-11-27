@@ -63,12 +63,12 @@ public sealed class DocumentFileTests : IDisposable
         File.WriteAllBytes(path, [.. Encoding.ASCII.GetBytes("<UIScript>caf"), 0xE9]);
 
         var failure = Assert.Throws<DocumentException>(() => DocumentFile.Open(path));
-        Assert.Contains("isn't UTF-8", failure.Message);
+        Assert.Matches(Said.Pattern(TextKeys.DocumentNotUtf8), failure.Message);
     }
 
     [Fact]
     public void AMissingFileIsReported() =>
-        Assert.Contains("There's no file", Assert.Throws<DocumentException>(() => DocumentFile.Open(Path.Combine(folder.Path, "nope.uix"))).Message);
+        Assert.Matches(Said.Pattern(TextKeys.DocumentMissing), Assert.Throws<DocumentException>(() => DocumentFile.Open(Path.Combine(folder.Path, "nope.uix"))).Message);
 
     [Fact]
     public void ADocumentTooLargeIsRefusedUnread()

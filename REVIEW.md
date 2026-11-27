@@ -27,6 +27,7 @@ through Hudini. The rules it checks against are in [AGENTS.md](AGENTS.md).
   [docs/depot-render.md](docs/depot-render.md)? Are requests validated before anything is read or drawn?
 - **Design Language:** Does new interface draw with the roles in `App.axaml`, put its words in the table, and put
   its commands in the menus? Do `LookTests` and `WordsTests` still pass?
+- **Words in tests:** Does a test copy the table's words, or re-test CSTNet, rather than check Depot by its keys?
 - **Threads:** Does code that touches Avalonia run on its thread, tests included?
 - **Dependencies:** Are new packages or version bumps called out, approved, and kept in a change of their own?
 - **Tests:** Do focused tests cover the change, and would a new test fail without it?

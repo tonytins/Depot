@@ -74,6 +74,20 @@ family: its structure, roles, behavior, and voice, in its own paint.
   in. Change them together.
 - Put words in the table, with a key in `TextKeys`, not in code: labels, menus, tooltips, hints, and messages someone
   reads. Programmer errors and the text Depot writes into documents stay in code. `WordsTests` keeps the two in step.
+
+### Tests and the words table
+
+The table exists so its words, and later its translations, change without touching code, so changing them mustn't
+break a test.
+
+- Never copy the table's words into a test. Find a menu item or check a message by its key: `Words.Get(TextKeys.…)`
+  with the values Depot fills in, or `Said.Pattern(TextKeys.…)` when a value can't be known, such as an exception's
+  message.
+- Test Depot's side of the table, not CSTNet: every `TextKeys` key is in the table, the XAML names only real keys,
+  a missing key shows itself, and the window shows words rather than keys. Don't re-test parsing or `%s`
+  formatting.
+- An entry no key names is only a warning, since the table may get words ahead of the code. `dotnet test` doesn't
+  print xunit's warnings; `dotnet run --project tests/Depot.Tests` does.
 - Commands go in the menus (`MainWindow.BuildMenus`). The title bar keeps only what's used constantly or shows what's
   in use.
 

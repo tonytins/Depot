@@ -21,7 +21,7 @@ public sealed class MainWindowTests : IDisposable
 
     private static string StatusOf(MainWindow window) => window.Get<TextBlock>("Status").Text ?? "";
 
-    private static bool CanSave(MainWindow window) => AppMenu.Find(window.Menus, "File", "Save")!.IsEnabled!();
+    private static bool CanSave(MainWindow window) => AppMenu.Find(window.Menus, Words.Get(TextKeys.MenuFile), Words.Get(TextKeys.ItemSave))!.IsEnabled!();
 
     [Fact]
     public void OpensAUIScriptDocumentToEdit() => TestApp.Run(() =>
@@ -91,7 +91,7 @@ public sealed class MainWindowTests : IDisposable
         Assert.True(window.Get<TextEditor>("Editor").IsReadOnly);
         Assert.False(window.HasUnsavedChanges);
         Assert.False(window.Save());
-        Assert.Contains("doesn't change it", StatusOf(window));
+        Assert.Matches(Said.Pattern(TextKeys.StatusUis), StatusOf(window));
     });
 
     [Fact]
@@ -103,7 +103,7 @@ public sealed class MainWindowTests : IDisposable
         Assert.False(window.Open(Path.Combine(folder.Path, "missing.uix")));
 
         Assert.Equal(Budget, window.Text);
-        Assert.Contains("There's no file", StatusOf(window));
+        Assert.Matches(Said.Pattern(TextKeys.DocumentMissing), StatusOf(window));
         Assert.Contains("problem", window.Get<TextBlock>("Status").Classes);
     });
 
@@ -114,7 +114,7 @@ public sealed class MainWindowTests : IDisposable
 
         window.Open(folder.File("budget.uix", Budget));
 
-        Assert.Contains("didn't find depot-render", window.Get<TextBlock>("CanvasMessage").Text);
+        Assert.Matches(Said.Pattern(TextKeys.CanvasNoRenderer), window.Get<TextBlock>("CanvasMessage").Text);
     });
 
     [Fact]
@@ -123,7 +123,7 @@ public sealed class MainWindowTests : IDisposable
         MainWindow window = new(rendererPath: null);
 
         Assert.Equal(CanvasLook.Depot, window.Look);
-        Assert.Equal(["Depot", "Depot Light", "Hudini Standard"], window.Get<ComboBox>("LookPicker").ItemsSource!.Cast<string>());
+        Assert.Equal([Words.Get(TextKeys.LookDepot), Words.Get(TextKeys.LookDepotLight), Words.Get(TextKeys.LookStandard)], window.Get<ComboBox>("LookPicker").ItemsSource!.Cast<string>());
     });
 
     // On Avalonia's thread like the rest: touching MainWindow runs Window's static setup, which must happen there.
@@ -134,10 +134,10 @@ public sealed class MainWindowTests : IDisposable
 
         var said = MainWindow.Describe(frames, document: null);
 
-        Assert.Contains("Hudini ignores Button.sparkle (line 3).", said);
-        Assert.Contains("Images not found, outlined in red: art.", said);
-        Assert.Contains("2 strings show their table and index", said);
-        Assert.Equal("200 × 130, as Hudini draws it.", MainWindow.Describe(frames with { MissingImages = [], MissingStrings = [], IgnoredAttributes = [] }, null));
+        Assert.Contains(Words.Get(TextKeys.StatusIgnored, "Button.sparkle (line 3)"), said);
+        Assert.Contains(Words.Get(TextKeys.StatusMissingImages, "art"), said);
+        Assert.Contains(Words.Get(TextKeys.StatusMissingStrings, 2), said);
+        Assert.Equal(Words.Get(TextKeys.StatusSize, 200, 130), MainWindow.Describe(frames with { MissingImages = [], MissingStrings = [], IgnoredAttributes = [] }, null));
     });
 
     // With depot-render built and a display to draw on, the whole way round: the text drawn, a typo reported, and

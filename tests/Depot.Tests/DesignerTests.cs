@@ -178,7 +178,7 @@ public sealed class DesignerTests : IDisposable
         editor.Document.Replace(0, editor.Text.Length, "<UIScript version=\"1\"><Window width=\"wide\" height=\"1\"/></UIScript>");
         Assert.True(window.Save());
 
-        Assert.Contains("Hudini won't read it as it is", StatusOf(window));
+        Assert.Matches(Said.Pattern(TextKeys.StatusSavedUnreadable), StatusOf(window));
         Assert.Contains("problem", window.Get<TextBlock>("Status").Classes);
     });
 
@@ -191,6 +191,6 @@ public sealed class DesignerTests : IDisposable
         Assert.False(window.DeleteSelection());
 
         Assert.Equal(Budget, window.Text);
-        Assert.Contains("Hudini wouldn't read that", StatusOf(window));
+        Assert.Matches(Said.Pattern(TextKeys.StatusRefused), StatusOf(window));
     });
 }

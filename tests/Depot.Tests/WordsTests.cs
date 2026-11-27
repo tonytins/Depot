@@ -8,7 +8,10 @@ using Depot.Interface;
 
 namespace Depot.Tests;
 
-/// <summary>Depot's words: the table, its keys, and that the window shows words rather than keys.</summary>
+/// <summary>
+/// Depot's words: that the code's keys are in the table, and that the window shows words rather than keys. These check
+/// the code against the table, never what the table says, so the words can change without breaking a test.
+/// </summary>
 public sealed partial class WordsTests
 {
     private static readonly string[] Keys =
@@ -19,21 +22,22 @@ public sealed partial class WordsTests
     ];
 
     [Fact]
-    public void TheTableReadsWithoutProblems()
-    {
-        var table = Words.Read();
-
-        Assert.NotNull(table);
-        Assert.Empty(table.Problems);
-    }
-
-    [Fact]
-    public void EveryKeyIsInTheTableAndEveryEntryHasAKey()
+    public void EveryKeyIsInTheTable()
     {
         var entries = Words.Read()!.Entries.Select(entry => entry.Key).ToHashSet();
 
         Assert.Equal([], Keys.Where(key => !entries.Contains(key)));
-        Assert.Equal([], entries.Where(key => key is null || !Keys.Contains(key)));
+    }
+
+    // Only a warning: the table may get words ahead of the code that uses them, and an entry nothing asks for
+    // harms nothing. It's still worth knowing about, since it may be a key that was renamed in one place only.
+    [Fact]
+    public void AnEntryNoKeyNamesIsOnlyAWarning()
+    {
+        var unused = Words.Read()!.Entries.Select(entry => entry.Key).Where(key => key is null || !Keys.Contains(key)).ToList();
+
+        if (unused.Count > 0)
+            TestContext.Current.AddWarning($"The table has entries no key in TextKeys names: {string.Join(", ", unused)}");
     }
 
     [Fact]
@@ -44,14 +48,6 @@ public sealed partial class WordsTests
 
         Assert.NotEmpty(named);
         Assert.Equal([], named.Where(key => !Keys.Contains(key)));
-    }
-
-    [Fact]
-    public void PlaceholdersAreFilledInOrder()
-    {
-        Assert.Equal("budget.uix (edited) — Depot", Words.Get(TextKeys.TitleDocumentEdited, "budget.uix"));
-        Assert.Equal("320 × 244, as Hudini draws it, showing the Main tab and the Roads pane.",
-            Words.Get(TextKeys.StatusSizeTabPane, "320", "244", "Main", "Roads"));
     }
 
     [Fact]
@@ -76,7 +72,7 @@ public sealed partial class WordsTests
         var shown = window.GetVisualDescendants().SelectMany(Said).Where(text => !string.IsNullOrEmpty(text)).ToList();
         shown.Add(window.Title ?? "");
 
-        Assert.Contains("Undo", shown);
+        Assert.Contains(Words.Get(TextKeys.BarUndo), shown);
         Assert.Equal([], shown.Where(Keys.Contains));
         window.Close();
     });

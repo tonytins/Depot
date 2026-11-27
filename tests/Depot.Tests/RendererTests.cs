@@ -59,6 +59,6 @@ public sealed class RendererTests : IDisposable
 
         var failure = await Assert.ThrowsAsync<RendererException>(() => renderer.RenderAsync(Request));
 
-        Assert.Contains("Couldn't start depot-render", failure.Message);
+        Assert.Matches(Said.Pattern(TextKeys.RendererCantStart), failure.Message);
     }
 }

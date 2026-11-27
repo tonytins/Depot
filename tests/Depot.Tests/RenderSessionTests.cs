@@ -87,7 +87,7 @@ public sealed class RenderSessionTests
 
         var failure = await Assert.ThrowsAsync<RendererException>(() => session.RenderAsync(Request));
 
-        Assert.Contains("didn't answer within", failure.Message);
+        Assert.Matches(Said.Pattern(TextKeys.RendererTimedOut), failure.Message);
         Assert.True(session.IsBroken);
     }
 }
