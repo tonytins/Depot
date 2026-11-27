@@ -1,0 +1,135 @@
+// Depot's words, in English. Change a label here, not in the code; Depot reads this table when it starts. %s is
+// filled in by Depot, in order. TextKeys.cs names every key, and a test checks the two agree. Write in the Venture
+// Design Language's voice: say what happened, plainly and calmly, and give a remedy only when the reader couldn't
+// work it out.
+
+// The window's title
+app name ^Depot^
+title document ^%s — Depot^
+title document edited ^%s (edited) — Depot^
+
+// The title bar
+bar menu tip ^Menu^
+bar undo ^Undo^
+bar undo tip ^Undo the last change, typed or designed (Ctrl+Z)^
+bar redo ^Redo^
+bar redo tip ^Redo what was undone (Ctrl+Shift+Z)^
+bar add ^Add ▾^
+bar add tip ^Add a control or a part of the window^
+bar look tip ^The Hudini theme the canvas draws in^
+bar no appearance ^No Appearance ▾^
+bar appearance ^Appearance: %s ▾^
+bar appearance tip ^The Hudini appearance documents are read with, as a game reads its windows^
+window minimize ^Minimize^
+window maximize ^Maximize^
+window restore ^Restore^
+window close ^Close^
+
+// The menus
+menu file ^File^
+menu edit ^Edit^
+menu insert ^Insert^
+menu arrange ^Arrange^
+menu view ^View^
+menu help ^Help^
+item open ^Open…^
+item save ^Save^
+item close window ^Close Window^
+item quit ^Quit^
+item undo ^Undo^
+item redo ^Redo^
+item duplicate ^Duplicate^
+item delete ^Delete^
+item bring forward ^Bring Forward^
+item send backward ^Send Backward^
+item look ^Look^
+item appearance ^Appearance^
+item choose appearance ^Choose an Appearance…^
+item no appearance ^No Appearance^
+item guide ^UIScript Guide^
+
+// What Add and Insert offer besides controls, which go by their element's name
+part picture ^Picture^
+part toolbar item ^Toolbar Item^
+part title field ^Title Field^
+
+// The looks the canvas draws in
+look depot ^Depot^
+look depot light ^Depot Light^
+look standard ^Hudini Standard^
+
+// The panes
+pane outline ^Outline^
+pane inspector ^Inspector^
+canvas no document ^No document open^
+canvas no renderer ^Depot can't draw: it didn't find depot-render. Build it with swift build in depot-render, put it beside Depot, or name it with %s.^
+hint no document ^Open a document to see its elements.^
+hint uis ^Depot shows .uis files, and doesn't change them.^
+hint unreadable ^Hudini can't read the text as it is, so only the text can be edited: %s^
+hint select ^Select an element to see its attributes.^
+
+// The inspector
+group identity ^Identity^
+group frame ^Frame^
+group text ^Text^
+group appearance ^Appearance^
+group behaviour ^Behaviour^
+group other ^Other^
+inspector other note ^Hudini doesn't read these; they're kept as written.^
+inspector required ^%s: required^
+inspector select first ^Select an element of a document Hudini reads first.^
+
+// The status bar
+status start ^Open a document to see it as Hudini draws it.^
+status uis ^%s is a .uis file: Depot shows it, and doesn't change it.^
+status saved ^Saved %s.^
+status saved unreadable ^Saved %s, but Hudini won't read it as it is: %s^
+status refused ^Hudini wouldn't read that: %s^
+status appearance refused ^Depot can't use the appearance %s: %s Keeping %s.^
+status appearance refused none ^Depot can't use the appearance %s: %s Reading documents without one.^
+status unsaved failed ^Couldn't ask about unsaved changes: %s^
+status picture unreadable ^Couldn't read depot-render's picture: %s^
+status guide failed ^Depot couldn't open %s in a browser.^
+status ignored ^Hudini ignores %s.^
+status missing images ^Images not found, outlined in red: %s.^
+status missing string ^1 string shows its table and index, since Depot doesn't read string tables yet.^
+status missing strings ^%s strings show their table and index, since Depot doesn't read string tables yet.^
+status uis part ^1 part of the .uis file Hudini can't represent.^
+status uis parts ^%s parts of the .uis file Hudini can't represent.^
+status size ^%s × %s, as Hudini draws it.^
+status size tab ^%s × %s, as Hudini draws it, showing the %s tab.^
+status size pane ^%s × %s, as Hudini draws it, showing the %s pane.^
+status size tab pane ^%s × %s, as Hudini draws it, showing the %s tab and the %s pane.^
+
+// Choosing files
+choose document ^Open a Document^
+choose appearance ^Choose a Hudini Appearance^
+files interface ^Interface documents^
+files uix ^UIScript^
+files uis ^Maxis interface scripts^
+files appearance ^Hudini appearances^
+
+// Unsaved changes
+unsaved title ^Unsaved Changes^
+unsaved question ^Save the changes to %s?^
+unsaved note ^If you don't, they're lost.^
+unsaved save ^Save^
+unsaved dont save ^Don't Save^
+unsaved cancel ^Cancel^
+unsaved this document ^this document^
+
+// Documents
+document missing ^There's no file at %s.^
+document too large ^%s is %s bytes; Depot opens documents up to %s.^
+document unreadable ^Couldn't read %s: %s^
+document not utf8 ^%s isn't UTF-8, which UIScript documents are.^
+document unsaved ^Couldn't save %s: %s^
+
+// depot-render
+renderer failed before ^This conversation with depot-render has already failed.^
+renderer timed out ^depot-render didn't answer within %s seconds.^
+renderer lost ^Depot lost touch with depot-render: %s^
+renderer said ^%s It said: %s^
+renderer cant start ^Couldn't start depot-render at %s: %s^
+renderer unreadable answer ^depot-render answered with something Depot can't read: %s^
+renderer empty answer ^depot-render answered with neither a picture nor an error: %s^

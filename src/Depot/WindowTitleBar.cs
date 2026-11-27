@@ -35,9 +35,9 @@ public sealed class WindowTitleBar : Border
         Height = BarHeight;
         Classes.Add("titleBar");
 
-        MinimizeButton = WindowButton("MinimizeButton", "Minimize", "M0,5 L10,5");
-        MaximizeButton = WindowButton("MaximizeButton", "Maximize", "M0.5,0.5 L9.5,0.5 L9.5,9.5 L0.5,9.5 Z");
-        CloseButton = WindowButton("CloseButton", "Close", "M0,0 L10,10 M10,0 L0,10");
+        MinimizeButton = WindowButton("MinimizeButton", Words.Get(TextKeys.WindowMinimize), "M0,5 L10,5");
+        MaximizeButton = WindowButton("MaximizeButton", Words.Get(TextKeys.WindowMaximize), "M0.5,0.5 L9.5,0.5 L9.5,9.5 L0.5,9.5 Z");
+        CloseButton = WindowButton("CloseButton", Words.Get(TextKeys.WindowClose), "M0,0 L10,10 M10,0 L0,10");
         CloseButton.Classes.Add("close");
         MinimizeButton.Click += (_, _) =>
         {
@@ -147,7 +147,7 @@ public sealed class WindowTitleBar : Border
 
         // A window that can't be resized doesn't offer to grow.
         MaximizeButton.IsEnabled = host?.CanResize ?? true;
-        ToolTip.SetTip(MaximizeButton, host?.WindowState == WindowState.Maximized ? "Restore" : "Maximize");
+        ToolTip.SetTip(MaximizeButton, Words.Get(host?.WindowState == WindowState.Maximized ? TextKeys.WindowRestore : TextKeys.WindowMaximize));
         PlaceContent();
     }
 

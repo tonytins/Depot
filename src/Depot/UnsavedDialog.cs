@@ -19,19 +19,19 @@ public enum UnsavedChoice
 /// <summary>Asks whether to save a document's changes before it's closed or replaced.</summary>
 public sealed class UnsavedDialog : Window
 {
-    public UnsavedDialog() : this("this document") { }
+    public UnsavedDialog() : this(Words.Get(TextKeys.UnsavedThisDocument)) { }
 
     public UnsavedDialog(string name)
     {
-        Title = "Unsaved Changes";
+        Title = Words.Get(TextKeys.UnsavedTitle);
         Width = 400;
         SizeToContent = SizeToContent.Height;
         CanResize = false;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-        Button save = new() { Content = "Save", IsDefault = true };
-        Button dontSave = new() { Content = "Don't Save" };
-        Button cancel = new() { Content = "Cancel", IsCancel = true };
+        Button save = new() { Content = Words.Get(TextKeys.UnsavedSave), IsDefault = true };
+        Button dontSave = new() { Content = Words.Get(TextKeys.UnsavedDontSave) };
+        Button cancel = new() { Content = Words.Get(TextKeys.UnsavedCancel), IsCancel = true };
         save.Click += (_, _) => Close(UnsavedChoice.Save);
         dontSave.Click += (_, _) => Close(UnsavedChoice.DontSave);
         cancel.Click += (_, _) => Close(UnsavedChoice.Cancel);
@@ -42,8 +42,8 @@ public sealed class UnsavedDialog : Window
             Spacing = 16,
             Children =
             {
-                new TextBlock { Text = $"Save the changes to {name}?", FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
-                new TextBlock { Text = "If you don't, they're lost.", Classes = { "secondary" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
+                new TextBlock { Text = Words.Get(TextKeys.UnsavedQuestion, name), FontWeight = Avalonia.Media.FontWeight.SemiBold, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
+                new TextBlock { Text = Words.Get(TextKeys.UnsavedNote), Classes = { "secondary" }, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
                 new StackPanel
                 {
                     Orientation = Orientation.Horizontal,

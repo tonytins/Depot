@@ -40,7 +40,7 @@ public sealed class Renderer(string executable) : IDisposable
             catch (RendererException exception)
             {
                 var said = Stop();
-                throw said is null ? exception : new RendererException($"{exception.Message} It said: {said}", exception);
+                throw said is null ? exception : new RendererException(Words.Get(TextKeys.RendererSaid, exception.Message, said), exception);
             }
         }
         finally
@@ -95,7 +95,7 @@ public sealed class Renderer(string executable) : IDisposable
         catch (Exception exception) when (exception is Win32Exception or InvalidOperationException)
         {
             started.Dispose();
-            throw new RendererException($"Couldn't start depot-render at {Executable}: {exception.Message}", exception);
+            throw new RendererException(Words.Get(TextKeys.RendererCantStart, Executable, exception.Message), exception);
         }
 
         started.BeginErrorReadLine();

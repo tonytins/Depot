@@ -23,6 +23,13 @@
     <!-- The text beside the canvas, with XML highlighting. -->
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
     <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
+    <!-- Depot's own words, in uitext; Depot.Interface uses it for documents' string tables, at the same version. -->
+    <PackageReference Include="CSTNet" Version="2.1.200" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Depot's words, read beside the app so a label changes without a rebuild. -->
+    <None Include="uitext\**\*.cst" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

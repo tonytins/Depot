@@ -31,9 +31,9 @@ public static class CanvasLooks
     /// <summary>The look's name as Depot shows it.</summary>
     public static string Title(this CanvasLook look) => look switch
     {
-        CanvasLook.Depot => "Depot",
-        CanvasLook.DepotLight => "Depot Light",
-        CanvasLook.Standard => "Hudini Standard",
+        CanvasLook.Depot => Words.Get(TextKeys.LookDepot),
+        CanvasLook.DepotLight => Words.Get(TextKeys.LookDepotLight),
+        CanvasLook.Standard => Words.Get(TextKeys.LookStandard),
         _ => throw new ArgumentOutOfRangeException(nameof(look), look, "There's no such look."),
     };
 }
@@ -122,11 +122,11 @@ public sealed record RenderReply(FrameMap? Frames, string? Error)
         }
         catch (JsonException exception)
         {
-            throw new RendererException($"depot-render answered with something Depot can't read: {Shorten(line)}", exception);
+            throw new RendererException(Words.Get(TextKeys.RendererUnreadableAnswer, Shorten(line)), exception);
         }
 
         if (reply is null || (reply.Frames is null) == (reply.Error is null))
-            throw new RendererException($"depot-render answered with neither a picture nor an error: {Shorten(line)}");
+            throw new RendererException(Words.Get(TextKeys.RendererEmptyAnswer, Shorten(line)));
         return reply;
     }
 

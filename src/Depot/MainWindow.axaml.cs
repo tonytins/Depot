@@ -125,7 +125,7 @@ public sealed partial class MainWindow : Window
         menuButton.Click += (_, _) => ShowFlyout(Menus, menuButton, PlacementMode.BottomEdgeAlignedLeft);
         undoButton.Click += (_, _) => Undo();
         redoButton.Click += (_, _) => Redo();
-        addButton.Click += (_, _) => ShowFlyout(MenuNamed("Insert").Entries, addButton, PlacementMode.BottomEdgeAlignedLeft);
+        addButton.Click += (_, _) => ShowFlyout(MenuNamed(Words.Get(TextKeys.MenuInsert)).Entries, addButton, PlacementMode.BottomEdgeAlignedLeft);
         appearanceButton.Click += (_, _) => ShowFlyout(AppearanceEntries(), appearanceButton, PlacementMode.BottomEdgeAlignedRight);
 
         redraw = new DispatcherTimer { Interval = RedrawDelay };
@@ -250,7 +250,11 @@ public sealed partial class MainWindow : Window
             }
             catch (Exception exception) when (exception is UIScriptException or IOException or UnauthorizedAccessException or ArgumentException)
             {
-                ShowStatus($"Depot can't use the appearance {System.IO.Path.GetFileName(path)}: {exception.Message}", isProblem: true);
+                // What stands in is said, since nothing else on screen changes.
+                var name = System.IO.Path.GetFileName(path);
+                ShowStatus(AppearancePath is { } kept
+                    ? Words.Get(TextKeys.StatusAppearanceRefused, name, exception.Message, System.IO.Path.GetFileName(kept))
+                    : Words.Get(TextKeys.StatusAppearanceRefusedNone, name, exception.Message), isProblem: true);
                 return false;
             }
         }
@@ -258,8 +262,10 @@ public sealed partial class MainWindow : Window
         appearance = loaded;
         AppearancePath = fullPath;
         RefreshMenus();
-        appearanceButton.Content = fullPath is null ? "No appearance ▾" : $"Appearance: {System.IO.Path.GetFileName(fullPath)} ▾";
-        ToolTip.SetTip(appearanceButton, fullPath ?? "The Hudini appearance documents are read with, as a game reads its windows");
+        appearanceButton.Content = fullPath is null
+            ? Words.Get(TextKeys.BarNoAppearance)
+            : Words.Get(TextKeys.BarAppearance, System.IO.Path.GetFileName(fullPath));
+        ToolTip.SetTip(appearanceButton, fullPath ?? Words.Get(TextKeys.BarAppearanceTip));
         design = null;
         RequestPicture();
         ShowPanels();
@@ -270,9 +276,9 @@ public sealed partial class MainWindow : Window
     {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Choose a Hudini Appearance",
+            Title = Words.Get(TextKeys.ChooseAppearance),
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Hudini appearances") { Patterns = ["*.xml"] }],
+            FileTypeFilter = [new FilePickerFileType(Words.Get(TextKeys.FilesAppearance)) { Patterns = ["*.xml"] }],
         });
         if (files is [var file] && file.TryGetLocalPath() is { } path)
             UseAppearance(path);
@@ -328,7 +334,7 @@ public sealed partial class MainWindow : Window
         canvas.Source = null;
         ShowTitle();
         ShowEdited();
-        ShowStatus(opened.IsReadOnly ? $"{opened.Name} is a .uis file: Depot shows it, and doesn't change it." : "", isProblem: false);
+        ShowStatus(opened.IsReadOnly ? Words.Get(TextKeys.StatusUis, opened.Name) : "", isProblem: false);
         RequestPicture();
         ShowPanels();
         return true;
@@ -355,9 +361,9 @@ public sealed partial class MainWindow : Window
 
         ShowEdited();
         if (Design?.Problem is { } problem)
-            ShowStatus($"Saved {open.Name}, but Hudini won't read it as it is: {problem.Message}", isProblem: true);
+            ShowStatus(Words.Get(TextKeys.StatusSavedUnreadable, open.Name, problem.Message), isProblem: true);
         else
-            ShowStatus($"Saved {open.Name}.", isProblem: false);
+            ShowStatus(Words.Get(TextKeys.StatusSaved, open.Name), isProblem: false);
         return true;
     }
 
@@ -460,7 +466,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is UIScriptException or ArgumentException)
         {
-            ShowStatus($"Hudini wouldn't read that: {exception.Message}", isProblem: true);
+            ShowStatus(Words.Get(TextKeys.StatusRefused, exception.Message), isProblem: true);
             return false;
         }
     }
@@ -469,7 +475,7 @@ public sealed partial class MainWindow : Window
     private string? CommitAttribute(string attribute, string? value)
     {
         if (Selection is not { } element || Design is not { IsEditable: true } current)
-            return "Select an element of a document Hudini reads first.";
+            return Words.Get(TextKeys.InspectorSelectFirst);
 
         try
         {
@@ -514,13 +520,13 @@ public sealed partial class MainWindow : Window
             return;
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Open a Document",
+            Title = Words.Get(TextKeys.ChooseDocument),
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("Interface documents") { Patterns = ["*.uix", "*.uis"] },
-                new FilePickerFileType("UIScript") { Patterns = ["*.uix"] },
-                new FilePickerFileType("Maxis interface scripts") { Patterns = ["*.uis"] },
+                new FilePickerFileType(Words.Get(TextKeys.FilesInterface)) { Patterns = ["*.uix", "*.uis"] },
+                new FilePickerFileType(Words.Get(TextKeys.FilesUix)) { Patterns = ["*.uix"] },
+                new FilePickerFileType(Words.Get(TextKeys.FilesUis)) { Patterns = ["*.uis"] },
             ],
         });
         if (files is [var file] && file.TryGetLocalPath() is { } path)
@@ -557,7 +563,7 @@ public sealed partial class MainWindow : Window
         catch (Exception exception)
         {
             // Asking failed, so the window stays open and the work with it.
-            ShowStatus($"Couldn't ask about unsaved changes: {exception.Message}", isProblem: true);
+            ShowStatus(Words.Get(TextKeys.StatusUnsavedFailed, exception.Message), isProblem: true);
         }
     }
 
@@ -571,8 +577,7 @@ public sealed partial class MainWindow : Window
             return;
         if (preview is null)
         {
-            canvasMessage.Text = "Depot can't draw: it didn't find depot-render. Build it with swift build in "
-                + $"depot-render, put it beside Depot, or name it with {RendererLocation.Variable}.";
+            canvasMessage.Text = Words.Get(TextKeys.CanvasNoRenderer, RendererLocation.Variable);
             canvasMessage.IsVisible = true;
             return;
         }
@@ -615,7 +620,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
         {
-            ShowCanvasProblem(request, $"Couldn't read depot-render's picture: {exception.Message}");
+            ShowCanvasProblem(request, Words.Get(TextKeys.StatusPictureUnreadable, exception.Message));
             Answered?.Invoke(request, reply);
             return;
         }
@@ -655,25 +660,25 @@ public sealed partial class MainWindow : Window
         ArgumentNullException.ThrowIfNull(frames);
         List<string> notes = [];
         if (document is { IsReadOnly: true })
-            notes.Add($"{document.Name} is a .uis file: Depot shows it, and doesn't change it.");
+            notes.Add(Words.Get(TextKeys.StatusUis, document.Name));
         if (frames.IgnoredAttributes.Count > 0)
-            notes.Add($"Hudini ignores {string.Join(", ", frames.IgnoredAttributes)}.");
+            notes.Add(Words.Get(TextKeys.StatusIgnored, string.Join(", ", frames.IgnoredAttributes)));
         if (frames.MissingImages.Count > 0)
-            notes.Add($"Images not found, outlined in red: {string.Join(", ", frames.MissingImages)}.");
+            notes.Add(Words.Get(TextKeys.StatusMissingImages, string.Join(", ", frames.MissingImages)));
         if (frames.MissingStrings.Count > 0)
-            notes.Add($"{frames.MissingStrings.Count} {(frames.MissingStrings.Count == 1 ? "string shows its" : "strings show their")} table and index, since Depot doesn't read string tables yet.");
+            notes.Add(frames.MissingStrings.Count == 1 ? Words.Get(TextKeys.StatusMissingString) : Words.Get(TextKeys.StatusMissingStrings, frames.MissingStrings.Count));
         if (frames.Notes.Count > 0)
-            notes.Add($"{frames.Notes.Count} {(frames.Notes.Count == 1 ? "part" : "parts")} of the .uis file Hudini can't represent.");
+            notes.Add(frames.Notes.Count == 1 ? Words.Get(TextKeys.StatusUisPart) : Words.Get(TextKeys.StatusUisParts, frames.Notes.Count));
         if (notes.Count > 0)
             return string.Join(" ", notes);
-        var showing = (frames.Tab, frames.Pane) switch
+        string width = $"{frames.Width:0}", height = $"{frames.Height:0}";
+        return (frames.Tab, frames.Pane) switch
         {
-            ({ } tab, { } pane) => $", showing the {tab} tab and the {pane} pane",
-            ({ } tab, null) => $", showing the {tab} tab",
-            (null, { } pane) => $", showing the {pane} pane",
-            _ => "",
+            ({ } tab, { } pane) => Words.Get(TextKeys.StatusSizeTabPane, width, height, tab, pane),
+            ({ } tab, null) => Words.Get(TextKeys.StatusSizeTab, width, height, tab),
+            (null, { } pane) => Words.Get(TextKeys.StatusSizePane, width, height, pane),
+            _ => Words.Get(TextKeys.StatusSize, width, height),
         };
-        return $"{frames.Width:0} × {frames.Height:0}, as Hudini draws it{showing}.";
     }
 
     /// <summary>
@@ -704,10 +709,10 @@ public sealed partial class MainWindow : Window
             syncingOutline = false;
         }
 
-        inspectorHint.Text = document is null ? "Open a document to see its elements."
-            : document.IsUis ? "Depot shows .uis files, and doesn't change them."
-            : !editable ? $"Hudini can't read the text as it is, so only the text can be edited: {current?.Problem?.Message}"
-            : Selection is null ? "Select an element to see its attributes."
+        inspectorHint.Text = document is null ? Words.Get(TextKeys.HintNoDocument)
+            : document.IsUis ? Words.Get(TextKeys.HintUis)
+            : !editable ? Words.Get(TextKeys.HintUnreadable, current?.Problem?.Message ?? "")
+            : Selection is null ? Words.Get(TextKeys.HintSelect)
             : "";
         inspectorHint.IsVisible = inspectorHint.Text.Length > 0;
         inspector.Show(editable && Selection is { } element ? xml!.Children[element] : null);
@@ -802,7 +807,7 @@ public sealed partial class MainWindow : Window
         }
         catch (UIScriptException exception)
         {
-            ShowStatus($"Hudini wouldn't read that: {exception.Message}", isProblem: true);
+            ShowStatus(Words.Get(TextKeys.StatusRefused, exception.Message), isProblem: true);
         }
     }
 
@@ -880,8 +885,8 @@ public sealed partial class MainWindow : Window
 
     private List<MenuEntry> AppearanceEntries() =>
     [
-        new MenuCommand("Choose an Appearance…", () => _ = ChooseAppearanceAsync()),
-        new MenuCommand("No Appearance", () => UseAppearance(null), IsEnabled: () => AppearancePath is not null),
+        new MenuCommand(Words.Get(TextKeys.ItemChooseAppearance), () => _ = ChooseAppearanceAsync()),
+        new MenuCommand(Words.Get(TextKeys.ItemNoAppearance), () => UseAppearance(null), IsEnabled: () => AppearancePath is not null),
     ];
 
     private List<AppMenuGroup> BuildMenus()
@@ -893,42 +898,42 @@ public sealed partial class MainWindow : Window
 
         return
         [
-            new("File",
+            new(Words.Get(TextKeys.MenuFile),
             [
-                new MenuCommand("Open…", () => _ = ChooseAndOpenAsync(), Ctrl(Key.O)),
-                new MenuCommand("Save", () => Save(), Ctrl(Key.S), () => HasUnsavedChanges),
+                new MenuCommand(Words.Get(TextKeys.ItemOpen), () => _ = ChooseAndOpenAsync(), Ctrl(Key.O)),
+                new MenuCommand(Words.Get(TextKeys.ItemSave), () => Save(), Ctrl(Key.S), () => HasUnsavedChanges),
                 new MenuSeparator(),
-                new MenuCommand("Close Window", Close, Ctrl(Key.W)),
-                new MenuCommand("Quit", Close, Ctrl(Key.Q)),
+                new MenuCommand(Words.Get(TextKeys.ItemCloseWindow), Close, Ctrl(Key.W)),
+                new MenuCommand(Words.Get(TextKeys.ItemQuit), Close, Ctrl(Key.Q)),
             ]),
-            new("Edit",
+            new(Words.Get(TextKeys.MenuEdit),
             [
-                new MenuCommand("Undo", Undo, Ctrl(Key.Z), () => Writable() && editor.CanUndo),
-                new MenuCommand("Redo", Redo, Ctrl(Key.Z, KeyModifiers.Shift), () => Writable() && editor.CanRedo),
+                new MenuCommand(Words.Get(TextKeys.ItemUndo), Undo, Ctrl(Key.Z), () => Writable() && editor.CanUndo),
+                new MenuCommand(Words.Get(TextKeys.ItemRedo), Redo, Ctrl(Key.Z, KeyModifiers.Shift), () => Writable() && editor.CanRedo),
                 new MenuSeparator(),
-                new MenuCommand("Duplicate", () => DuplicateSelection(), Ctrl(Key.D), Selected),
-                new MenuCommand("Delete", () => DeleteSelection(), new KeyGesture(Key.Delete), Selected),
+                new MenuCommand(Words.Get(TextKeys.ItemDuplicate), () => DuplicateSelection(), Ctrl(Key.D), Selected),
+                new MenuCommand(Words.Get(TextKeys.ItemDelete), () => DeleteSelection(), new KeyGesture(Key.Delete), Selected),
             ]),
-            new("Insert",
+            new(Words.Get(TextKeys.MenuInsert),
             [
                 .. DesignEdits.Library.Select(control => new MenuCommand(control.Element, () => Add(control.Element), IsEnabled: Editable)),
                 new MenuSeparator(),
                 .. DesignEdits.Parts.Select(part => new MenuCommand(part.Title, () => Add(part.Element), IsEnabled: Editable)),
             ]),
-            new("Arrange",
+            new(Words.Get(TextKeys.MenuArrange),
             [
-                new MenuCommand("Bring Forward", () => BringForward(), Ctrl(Key.OemCloseBrackets), Selected),
-                new MenuCommand("Send Backward", () => SendBackward(), Ctrl(Key.OemOpenBrackets), Selected),
+                new MenuCommand(Words.Get(TextKeys.ItemBringForward), () => BringForward(), Ctrl(Key.OemCloseBrackets), Selected),
+                new MenuCommand(Words.Get(TextKeys.ItemSendBackward), () => SendBackward(), Ctrl(Key.OemOpenBrackets), Selected),
             ]),
-            new("View",
+            new(Words.Get(TextKeys.MenuView),
             [
-                new AppMenuGroup("Look", [.. Enum.GetValues<CanvasLook>().Select(look =>
+                new AppMenuGroup(Words.Get(TextKeys.ItemLook), [.. Enum.GetValues<CanvasLook>().Select(look =>
                     new MenuCommand(look.Title(), () => Look = look, IsChecked: () => Look == look))]),
-                new AppMenuGroup("Appearance", AppearanceEntries()),
+                new AppMenuGroup(Words.Get(TextKeys.ItemAppearance), AppearanceEntries()),
             ]),
-            new("Help",
+            new(Words.Get(TextKeys.MenuHelp),
             [
-                new MenuCommand("UIScript Guide", () => _ = OpenGuideAsync()),
+                new MenuCommand(Words.Get(TextKeys.ItemGuide), () => _ = OpenGuideAsync()),
             ]),
         ];
     }
@@ -952,7 +957,7 @@ public sealed partial class MainWindow : Window
     private async Task OpenGuideAsync()
     {
         if (!await Launcher.LaunchUriAsync(GuideAddress))
-            ShowStatus($"Depot couldn't open {GuideAddress} in a browser.", isProblem: true);
+            ShowStatus(Words.Get(TextKeys.StatusGuideFailed, GuideAddress), isProblem: true);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -977,9 +982,8 @@ public sealed partial class MainWindow : Window
         ShowTitle();
     }
 
-    private void ShowTitle() => Title = document is null
-        ? "Depot"
-        : $"{document.Name}{(HasUnsavedChanges ? " (edited)" : "")} — Depot";
+    private void ShowTitle() => Title = document is null ? Words.Get(TextKeys.AppName)
+        : Words.Get(HasUnsavedChanges ? TextKeys.TitleDocumentEdited : TextKeys.TitleDocument, document.Name);
 
     private ThemeName HighlightTheme() => ActualThemeVariant == ThemeVariant.Dark ? ThemeName.DarkPlus : ThemeName.LightPlus;
 }

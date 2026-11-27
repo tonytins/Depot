@@ -50,14 +50,14 @@ public sealed class DocumentFile
         {
             FileInfo file = new(full);
             if (!file.Exists)
-                throw new DocumentException($"There's no file at {full}.");
+                throw new DocumentException(Words.Get(TextKeys.DocumentMissing, full));
             if (file.Length > MaximumSize)
-                throw new DocumentException($"{file.Name} is {file.Length:N0} bytes; Depot opens documents up to {MaximumSize:N0}.");
+                throw new DocumentException(Words.Get(TextKeys.DocumentTooLarge, file.Name, $"{file.Length:N0}", $"{MaximumSize:N0}"));
             bytes = File.ReadAllBytes(full);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            throw new DocumentException($"Couldn't read {full}: {exception.Message}", exception);
+            throw new DocumentException(Words.Get(TextKeys.DocumentUnreadable, full, exception.Message), exception);
         }
 
         var hasMark = bytes.AsSpan().StartsWith(ByteOrderMark);
@@ -72,7 +72,7 @@ public sealed class DocumentFile
             // UIScript is UTF-8, so text that isn't is refused rather than garbled. A .uis file is only shown, and
             // depot-render reads it from disk, so its text is shown as well as it can be.
             if (!string.Equals(System.IO.Path.GetExtension(full), ".uis", StringComparison.OrdinalIgnoreCase))
-                throw new DocumentException($"{System.IO.Path.GetFileName(full)} isn't UTF-8, which UIScript documents are.", exception);
+                throw new DocumentException(Words.Get(TextKeys.DocumentNotUtf8, System.IO.Path.GetFileName(full)), exception);
             text = Encoding.Latin1.GetString(body);
         }
 
@@ -112,7 +112,7 @@ public sealed class DocumentFile
                 // The save already failed and says so; a stray temporary file is the lesser problem.
             }
 
-            throw new DocumentException($"Couldn't save {Name}: {exception.Message}", exception);
+            throw new DocumentException(Words.Get(TextKeys.DocumentUnsaved, Name, exception.Message), exception);
         }
 
         Text = text;

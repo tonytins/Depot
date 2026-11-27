@@ -39,9 +39,9 @@ public static class DesignEdits
     /// <summary>The parts of a window that aren't controls, which the library adds too.</summary>
     public static IReadOnlyList<(string Element, string Title)> Parts { get; } =
     [
-        ("Visual", "Picture"),
-        ("ToolbarItem", "Toolbar Item"),
-        ("TitleField", "Title Field"),
+        ("Visual", Words.Get(TextKeys.PartPicture)),
+        ("ToolbarItem", Words.Get(TextKeys.PartToolbarItem)),
+        ("TitleField", Words.Get(TextKeys.PartTitleField)),
     ];
 
     /// <summary>

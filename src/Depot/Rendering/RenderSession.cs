@@ -24,7 +24,7 @@ public sealed class RenderSession(TextWriter input, TextReader output, TimeSpan 
     {
         ArgumentNullException.ThrowIfNull(request);
         if (IsBroken)
-            throw new RendererException("This conversation with depot-render has already failed.");
+            throw new RendererException(Words.Get(TextKeys.RendererFailedBefore));
 
         using CancellationTokenSource deadline = new(timeout);
         try
@@ -39,12 +39,12 @@ public sealed class RenderSession(TextWriter input, TextReader output, TimeSpan 
         catch (OperationCanceledException exception)
         {
             IsBroken = true;
-            throw new RendererException($"depot-render didn't answer within {timeout.TotalSeconds:0.#} seconds.", exception);
+            throw new RendererException(Words.Get(TextKeys.RendererTimedOut, $"{timeout.TotalSeconds:0.#}"), exception);
         }
         catch (IOException exception)
         {
             IsBroken = true;
-            throw new RendererException($"Depot lost touch with depot-render: {exception.Message}", exception);
+            throw new RendererException(Words.Get(TextKeys.RendererLost, exception.Message), exception);
         }
         catch (RendererException)
         {

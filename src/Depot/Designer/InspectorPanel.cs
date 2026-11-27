@@ -67,17 +67,17 @@ public sealed class InspectorPanel : StackPanel
             var members = listed.Where(info => info.Group == group).ToList();
             if (members.Count == 0)
                 continue;
-            AddHeading(group.ToString());
+            AddHeading(GroupTitle(group));
             foreach (var info in members)
                 AddField(info);
         }
 
         if (others.Length > 0)
         {
-            AddHeading("Other");
+            AddHeading(Words.Get(TextKeys.GroupOther));
             Children.Add(new TextBlock
             {
-                Text = "Hudini doesn't read these; they're kept as written.",
+                Text = Words.Get(TextKeys.InspectorOtherNote),
                 Classes = { "secondary", "caption" },
                 TextWrapping = TextWrapping.Wrap,
             });
@@ -85,6 +85,17 @@ public sealed class InspectorPanel : StackPanel
                 AddField(new UIAttributeInfo(name, UIAttributeGroup.Behaviour, UIAttributeKind.Text));
         }
     }
+
+    /// <summary>A group's heading, as the inspector shows it.</summary>
+    public static string GroupTitle(UIAttributeGroup group) => Words.Get(group switch
+    {
+        UIAttributeGroup.Identity => TextKeys.GroupIdentity,
+        UIAttributeGroup.Frame => TextKeys.GroupFrame,
+        UIAttributeGroup.Text => TextKeys.GroupText,
+        UIAttributeGroup.Appearance => TextKeys.GroupAppearance,
+        UIAttributeGroup.Behaviour => TextKeys.GroupBehaviour,
+        _ => throw new ArgumentOutOfRangeException(nameof(group), group, "There's no such group."),
+    });
 
     private void AddHeading(string text) =>
         Children.Add(new TextBlock { Text = text, Classes = { "heading" }, Margin = new(0, 10, 0, 2) });
@@ -121,7 +132,7 @@ public sealed class InspectorPanel : StackPanel
                 VerticalAlignment = VerticalAlignment.Center,
                 TextTrimming = TextTrimming.CharacterEllipsis,
             };
-            ToolTip.SetTip(label, info.IsRequired ? $"{info.Name}: required" : info.Name);
+            ToolTip.SetTip(label, info.IsRequired ? Words.Get(TextKeys.InspectorRequired, info.Name) : info.Name);
 
             Editor = info.Kind switch
             {
