@@ -39,3 +39,8 @@ When the look changes, change it in Hudini, in Depot's `App.axaml`, and here, to
 Depot draws its window with Avalonia's Fluent theme, compact, with its colors set to the look above. It follows the
 system's light or dark setting. Its controls are Fluent's, not VentureOS's, so buttons, lists, and menus look like
 an Avalonia app's in Depot's colors.
+
+Its title bar is also its toolbar, as the Venture Design Language has it, where the desktop allows; otherwise the bar
+sits under the window manager's. Its window buttons are Windows-style, minimize, maximize, and close at the right,
+since Depot is a cousin of Venture's apps rather than one of them. Behind the canvas is `#30353F` in the dark look, lighter
+than the `depot` theme's window, so a window's edge shows.

@@ -78,7 +78,6 @@ public sealed class LookTests
         Assert.Equal(Role("inputBackground", palette), fluent.AltMedium);
         Assert.Equal(Role("text", palette), fluent.BaseHigh);
         Assert.Equal(Role("headerBar", palette), fluent.ChromeMediumLow);
-        Assert.Equal(Role("canvasBackground", palette), fluent.ChromeLow);
         Assert.Equal(Role("errorText", palette), fluent.ErrorText);
     });
 

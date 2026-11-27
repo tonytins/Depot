@@ -27,8 +27,9 @@
           <SolidColorBrush x:Key="selection" Color="#605031"/>
           <!-- Depot's own: the bars above and below the editor and canvas, and behind the canvas. -->
           <SolidColorBrush x:Key="headerBar" Color="#262B34"/>
-          <SolidColorBrush x:Key="canvasBackground" Color="#1F232B"/>
-          <SolidColorBrush x:Key="errorText" Color="#E86A60"/>
+          <!-- Lighter than Hudini's depot window and its title bar, so a window's edge shows against it. -->
+          <SolidColorBrush x:Key="canvasBackground" Color="#30353F"/>
+          <SolidColorBrush x:Key="errorText" Color="#EE7B72"/>
           <!-- The States table's hover and press: text at 7% and 16%. -->
           <SolidColorBrush x:Key="hover" Color="#12E4E8EE"/>
           <SolidColorBrush x:Key="pressed" Color="#29E4E8EE"/>
@@ -64,6 +65,22 @@
 
       <CornerRadius x:Key="ControlCornerRadius">6</CornerRadius>
       <CornerRadius x:Key="OverlayCornerRadius">8</CornerRadius>
+
+      <!--
+        Where the bar is the title bar on Linux, Avalonia draws the window's frame, so the window manager doesn't add
+        its own title bar above. The frame keeps its edges for resizing and draws nothing else: the bar holds the
+        title and the buttons. From Roundhouse.
+      -->
+      <ControlTheme x:Key="FrameOnly" TargetType="WindowDrawnDecorations">
+        <Setter Property="DefaultTitleBarHeight" Value="42"/>
+        <Setter Property="DefaultFrameThickness" Value="4"/>
+        <Setter Property="DefaultShadowThickness" Value="0"/>
+        <Setter Property="Template">
+          <WindowDrawnDecorationsTemplate>
+            <WindowDrawnDecorationsContent/>
+          </WindowDrawnDecorationsTemplate>
+        </Setter>
+      </ControlTheme>
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>
@@ -91,7 +108,7 @@
                                ChromeAltLow="#E4E8EE"
                                ListLow="#262B34"
                                ListMedium="#3A4250"
-                               ErrorText="#E86A60"/>
+                               ErrorText="#EE7B72"/>
         <ColorPaletteResources x:Key="Light"
                                Accent="#B07A0E"
                                RegionColor="#FAFAFB"
@@ -117,7 +134,65 @@
     </FluentTheme>
     <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml"/>
 
-    <!-- The bars above and below the editor and canvas, a step from the window, as Hudini's title bar is. -->
+    <!-- The title bar, which holds the toolbar, and the status bar: a step from the window, as Hudini's title bar is. -->
+    <Style Selector=":is(Border).titleBar">
+      <Setter Property="Background" Value="{DynamicResource headerBar}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource border}"/>
+      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    </Style>
+    <Style Selector="TextBlock.barTitle">
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+    <!-- The bar's buttons are flat on it, and only show themselves under the pointer, as the States table has it. -->
+    <Style Selector=":is(Border).titleBar :is(Button).bar">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="10,5"/>
+    </Style>
+    <Style Selector=":is(Border).titleBar :is(Button).bar:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource hover}"/>
+    </Style>
+    <Style Selector=":is(Border).titleBar :is(Button).bar:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource pressed}"/>
+    </Style>
+    <Style Selector=":is(Border).titleBar :is(Button).bar:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <!-- Windows-style window buttons: the bar's full height, square, with a red close under the pointer. -->
+    <Style Selector="Button.caption">
+      <Setter Property="Width" Value="46"/>
+      <Setter Property="Height" Value="41"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.caption Path">
+      <Setter Property="Stroke" Value="{DynamicResource text}"/>
+    </Style>
+    <Style Selector="Button.caption:disabled Path">
+      <Setter Property="Stroke" Value="{DynamicResource disabledText}"/>
+    </Style>
+    <Style Selector="Button.caption:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource hover}"/>
+    </Style>
+    <Style Selector="Button.caption:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource pressed}"/>
+    </Style>
+    <!-- Windows 11's close red, an exact color, the same on light and dark. -->
+    <Style Selector="Button.caption.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#C42B1C"/>
+    </Style>
+    <Style Selector="Button.caption.close:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#A32417"/>
+    </Style>
+    <Style Selector="Button.caption.close:pointerover Path">
+      <Setter Property="Stroke" Value="White"/>
+    </Style>
+
     <Style Selector="Border.bar">
       <Setter Property="Background" Value="{DynamicResource headerBar}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource border}"/>

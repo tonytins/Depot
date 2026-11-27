@@ -95,6 +95,8 @@ public sealed partial class MainWindow : Window
         inspector = this.Get<InspectorPanel>("InspectorView");
         renderOwner = owner;
 
+        this.Get<WindowTitleBar>("TitleBar").Attach(this, TitleBars.Merges());
+
         lookPicker.ItemsSource = Enum.GetValues<CanvasLook>().Select(look => look.Title()).ToArray();
         lookPicker.SelectedIndex = (int)CanvasLook.Depot;
         lookPicker.SelectionChanged += (_, _) => RequestPicture();

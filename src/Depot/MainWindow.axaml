@@ -2,30 +2,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ae="https://github.com/avaloniaui/avaloniaedit"
         xmlns:designer="using:Depot.Designer"
+        xmlns:local="using:Depot"
         x:Class="Depot.MainWindow"
         Title="Depot"
         Width="1280" Height="760"
         MinWidth="800" MinHeight="440">
   <DockPanel>
-    <Border DockPanel.Dock="Top" Classes="bar" BorderThickness="0,0,0,1" Padding="8,6">
-      <DockPanel>
-        <StackPanel Orientation="Horizontal" Spacing="6">
-          <Button x:Name="OpenButton" Content="Open…" HotKey="Ctrl+O" ToolTip.Tip="Open a .uix or .uis document (Ctrl+O)"/>
-          <Button x:Name="SaveButton" Content="Save" HotKey="Ctrl+S" IsEnabled="False" ToolTip.Tip="Save the document (Ctrl+S)"/>
-          <Border Width="12"/>
-          <Button x:Name="UndoButton" Content="Undo" IsEnabled="False" ToolTip.Tip="Undo the last change, typed or designed (Ctrl+Z)"/>
-          <Button x:Name="RedoButton" Content="Redo" IsEnabled="False" ToolTip.Tip="Redo what was undone (Ctrl+Shift+Z)"/>
-          <Border Width="12"/>
-          <Button x:Name="AddButton" Content="Add ▾" IsEnabled="False" ToolTip.Tip="Add a control or a part of the window"/>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-          <TextBlock Text="Look" Classes="secondary" VerticalAlignment="Center"/>
-          <ComboBox x:Name="LookPicker" MinWidth="160" ToolTip.Tip="The Hudini theme the canvas draws in"/>
-          <Button x:Name="AppearanceButton" Content="No appearance ▾"
-                  ToolTip.Tip="The Hudini appearance documents are read with, as a game reads its windows"/>
-        </StackPanel>
-      </DockPanel>
-    </Border>
+    <!-- The title bar, which is the toolbar; where the desktop allows, it's the window's own title bar. -->
+    <local:WindowTitleBar x:Name="TitleBar" DockPanel.Dock="Top">
+      <local:WindowTitleBar.Start>
+        <Button x:Name="OpenButton" Classes="bar" Content="Open…" HotKey="Ctrl+O" ToolTip.Tip="Open a .uix or .uis document (Ctrl+O)"/>
+        <Button x:Name="SaveButton" Classes="bar" Content="Save" HotKey="Ctrl+S" IsEnabled="False" ToolTip.Tip="Save the document (Ctrl+S)"/>
+        <Border Width="8"/>
+        <Button x:Name="UndoButton" Classes="bar" Content="Undo" IsEnabled="False" ToolTip.Tip="Undo the last change, typed or designed (Ctrl+Z)"/>
+        <Button x:Name="RedoButton" Classes="bar" Content="Redo" IsEnabled="False" ToolTip.Tip="Redo what was undone (Ctrl+Shift+Z)"/>
+        <Border Width="8"/>
+        <Button x:Name="AddButton" Classes="bar" Content="Add ▾" IsEnabled="False" ToolTip.Tip="Add a control or a part of the window"/>
+      </local:WindowTitleBar.Start>
+      <local:WindowTitleBar.End>
+        <ComboBox x:Name="LookPicker" MinWidth="140" VerticalAlignment="Center" ToolTip.Tip="The Hudini theme the canvas draws in"/>
+        <Button x:Name="AppearanceButton" Classes="bar" Content="No appearance ▾"
+                ToolTip.Tip="The Hudini appearance documents are read with, as a game reads its windows"/>
+      </local:WindowTitleBar.End>
+    </local:WindowTitleBar>
     <Border DockPanel.Dock="Bottom" Classes="bar" BorderThickness="0,1,0,0" Padding="10,5">
       <TextBlock x:Name="Status" TextWrapping="Wrap" Text="Open a document to see it as Hudini draws it."/>
     </Border>
