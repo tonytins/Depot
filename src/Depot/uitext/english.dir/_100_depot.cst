@@ -5,8 +5,8 @@
 
 // The window's title
 app name ^Depot^
-title document ^%s — Depot^
-title document edited ^%s (edited) — Depot^
+title document ^%s^
+title document edited ^%s (edited)^
 
 // The title bar
 bar menu tip ^Menu^
@@ -62,9 +62,9 @@ look standard ^Hudini Standard^
 pane outline ^Outline^
 pane inspector ^Inspector^
 canvas no document ^No document open^
-canvas no renderer ^Depot can't draw: it didn't find depot-render. Build it with swift build in depot-render, put it beside Depot, or name it with %s.^
+canvas no renderer ^Unable to locate depot-render. Try building and placing it beside Depot, or name it with %s.^
 hint no document ^Open a document to see its elements.^
-hint uis ^Depot shows .uis files, and doesn't change them.^
+hint uis ^Can't edit .uis files.^
 hint unreadable ^Hudini can't read the text as it is, so only the text can be edited: %s^
 hint select ^Select an element to see its attributes.^
 
@@ -80,8 +80,8 @@ inspector required ^%s: required^
 inspector select first ^Select an element of a document Hudini reads first.^
 
 // The status bar
-status start ^Open a document to see it as Hudini draws it.^
-status uis ^%s is a .uis file: Depot shows it, and doesn't change it.^
+status start ^Open a document.^
+status uis ^Opened %s in read only mode.^
 status saved ^Saved %s.^
 status saved unreadable ^Saved %s, but Hudini won't read it as it is: %s^
 status refused ^Hudini wouldn't read that: %s^
@@ -96,10 +96,10 @@ status missing string ^1 string shows its table and index, since Depot doesn't r
 status missing strings ^%s strings show their table and index, since Depot doesn't read string tables yet.^
 status uis part ^1 part of the .uis file Hudini can't represent.^
 status uis parts ^%s parts of the .uis file Hudini can't represent.^
-status size ^%s × %s, as Hudini draws it.^
-status size tab ^%s × %s, as Hudini draws it, showing the %s tab.^
-status size pane ^%s × %s, as Hudini draws it, showing the %s pane.^
-status size tab pane ^%s × %s, as Hudini draws it, showing the %s tab and the %s pane.^
+status size ^%s × %s.^
+status size tab ^%s × %s, showing the %s tab.^
+status size pane ^%s × %s, showing the %s pane.^
+status size tab pane ^%s × %s, showing the %s tab and the %s pane.^
 
 // Choosing files
 choose document ^Open a Document^
