@@ -157,6 +157,11 @@ public sealed partial class MainWindow : Window
             preview.Failed += (request, exception) => ShowCanvasProblem(request, exception.Message);
         }
 
+        const string BLANK_FILE = "blank.uix";
+
+        if (File.Exists(BLANK_FILE))
+            Open(BLANK_FILE);
+
         canvasHost.PointerPressed += OnCanvasPressed;
         canvasHost.PointerMoved += OnCanvasMoved;
         canvasHost.PointerReleased += OnCanvasReleased;

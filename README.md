@@ -1,9 +1,10 @@
 # Depot
 
-Depot (a working title) is a designer for the [UIScript](https://github.com/tonytins/VentureOS/blob/main/docs/uiscript/README.md)
+Depot (working title) is a designer for the [UIScript](https://github.com/tonytins/VentureOS/blob/main/docs/uiscript/README.md)
 documents that [Hudini](https://github.com/tonytins/Hudini)'s games read. It's a spin-off of Roundhouse,
-VentureOS's IDE, and draws its canvas with Hudini itself, so what you design is what the game draws.
+VentureOS' IDE, and draws its canvas with Hudini itself, so what you see is what you get.
 
+<!--
 Depot shows a document's text beside the canvas, and redraws the canvas as you type, in the look you choose:
 Depot's own, its light twin, or Hudini's standard one. You design on the canvas, and every change is a change to
 the text, which you can always edit by hand. It edits and saves UIScript (`.uix`) documents, and shows Maxis
@@ -66,7 +67,7 @@ the newer of `depot-render/.build/release` and `depot-render/.build/debug` in th
 - `depot-render`: a Swift package that draws a document with Hudini, for the canvas.
 - `tests`: the tests for both .NET projects, and `tests/Fixtures`, Hudini's example documents, which every suite
   reads; `depot-render`'s tests are in its package.
-
+-->
 ## depot-render
 
 `depot-render` draws a UIScript or `.uis` document with Hudini, writes the picture as a PNG, and prints where Hudini
@@ -90,10 +91,6 @@ dotnet test --project tests/Depot.Interface.Tests
 dotnet test --project tests/Depot.Tests
 (cd depot-render && swift build && swift test)
 ```
-
-Both test suites read Hudini's example documents from `tests/Fixtures`. One of Depot's tests draws with
-`depot-render` and is skipped when it isn't built or there's no display; run it on a virtual one with
-`DISPLAY=:99 dotnet test --project tests/Depot.Tests` while Xvfb serves `:99`.
 
 ## Documentation
 

@@ -11,7 +11,7 @@ title document edited ^%s (edited)^
 // The title bar
 bar menu tip ^Menu^
 bar undo ^Undo^
-bar undo tip ^Undo the last change, typed or designed (Ctrl+Z)^
+bar undo tip ^Undo the last change (Ctrl+Z)^
 bar redo ^Redo^
 bar redo tip ^Redo what was undone (Ctrl+Shift+Z)^
 bar add ^Add ▾^
@@ -33,6 +33,7 @@ menu arrange ^Arrange^
 menu view ^View^
 menu help ^Help^
 item open ^Open…^
+item new ^New^
 item save ^Save^
 item close window ^Close Window^
 item quit ^Quit^

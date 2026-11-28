@@ -36,6 +36,7 @@ public static class TextKeys
     public const string MenuView = "menu view";
     public const string MenuHelp = "menu help";
     public const string ItemOpen = "item open";
+    public const string ItemNew = "item new";
     public const string ItemSave = "item save";
     public const string ItemCloseWindow = "item close window";
     public const string ItemQuit = "item quit";

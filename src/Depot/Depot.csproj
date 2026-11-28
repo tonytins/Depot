@@ -30,6 +30,7 @@
   <ItemGroup>
     <!-- Depot's words, read beside the app so a label changes without a rebuild. -->
     <None Include="uitext\**\*.cst" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="blank.uix" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
