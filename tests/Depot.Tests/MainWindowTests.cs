@@ -33,7 +33,7 @@ public sealed class MainWindowTests : IDisposable
 
         Assert.Equal(Budget, window.Text);
         Assert.False(window.Get<TextEditor>("Editor").IsReadOnly);
-        Assert.Equal("budget.uix — Depot", window.Title);
+        Assert.Equal("budget.uix", window.Title);
         Assert.False(window.HasUnsavedChanges);
         Assert.False(CanSave(window));
     });
@@ -48,12 +48,12 @@ public sealed class MainWindowTests : IDisposable
         window.Get<TextEditor>("Editor").Document.Insert(0, "<!-- edited -->\n");
 
         Assert.True(window.HasUnsavedChanges);
-        Assert.Equal("budget.uix (edited) — Depot", window.Title);
+        Assert.Equal("budget.uix (edited)", window.Title);
         Assert.True(CanSave(window));
 
         Assert.True(window.Save());
         Assert.Equal("<!-- edited -->\n" + Budget, File.ReadAllText(path));
-        Assert.Equal("budget.uix — Depot", window.Title);
+        Assert.Equal("budget.uix", window.Title);
         Assert.False(CanSave(window));
     });
 
