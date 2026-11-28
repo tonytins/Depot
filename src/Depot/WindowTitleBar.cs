@@ -63,10 +63,10 @@ public sealed class WindowTitleBar : Border
     }
 
     /// <summary>The items at the bar's left end.</summary>
-    public Avalonia.Controls.Controls Start => startItems.Children;
+    public Controls Start => startItems.Children;
 
     /// <summary>The items at the bar's right end, before the window's buttons.</summary>
-    public Avalonia.Controls.Controls End => endItems.Children;
+    public Controls End => endItems.Children;
 
     /// <summary>The title shown in the bar: the window's own.</summary>
     public string? Title => title.Text;

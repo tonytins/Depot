@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 
+// REVIEW: Depot can use .NET's native System.Xml like Hudini uses FoundationXML.
 namespace Depot.Interface.Xml;
 
 /// <summary>A stretch of a document's text, by the index of its first character and its length.</summary>

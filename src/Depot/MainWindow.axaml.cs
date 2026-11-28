@@ -47,7 +47,7 @@ public sealed partial class MainWindow : Window
     private readonly TextBlock status;
     private readonly Image canvas;
     private readonly Panel canvasHost;
-    private readonly Avalonia.Controls.Canvas selectionLayer;
+    private readonly Canvas selectionLayer;
     private readonly TextBlock canvasMessage;
     private readonly ListBox outline;
     private readonly TextBlock inspectorHint;
@@ -90,7 +90,7 @@ public sealed partial class MainWindow : Window
         status = this.Get<TextBlock>("Status");
         canvas = this.Get<Image>("Canvas");
         canvasHost = this.Get<Panel>("CanvasHost");
-        selectionLayer = this.Get<Avalonia.Controls.Canvas>("SelectionLayer");
+        selectionLayer = this.Get<Canvas>("SelectionLayer");
         canvasMessage = this.Get<TextBlock>("CanvasMessage");
         outline = this.Get<ListBox>("Outline");
         inspectorHint = this.Get<TextBlock>("InspectorHint");
@@ -245,15 +245,15 @@ public sealed partial class MainWindow : Window
         {
             try
             {
-                fullPath = System.IO.Path.GetFullPath(path);
+                fullPath = Path.GetFullPath(path);
                 loaded = HudiniAppearance.Load(fullPath);
             }
             catch (Exception exception) when (exception is UIScriptException or IOException or UnauthorizedAccessException or ArgumentException)
             {
                 // What stands in is said, since nothing else on screen changes.
-                var name = System.IO.Path.GetFileName(path);
+                var name = Path.GetFileName(path);
                 ShowStatus(AppearancePath is { } kept
-                    ? Words.Get(TextKeys.StatusAppearanceRefused, name, exception.Message, System.IO.Path.GetFileName(kept))
+                    ? Words.Get(TextKeys.StatusAppearanceRefused, name, exception.Message, Path.GetFileName(kept))
                     : Words.Get(TextKeys.StatusAppearanceRefusedNone, name, exception.Message), isProblem: true);
                 return false;
             }
@@ -264,7 +264,7 @@ public sealed partial class MainWindow : Window
         RefreshMenus();
         appearanceButton.Content = fullPath is null
             ? Words.Get(TextKeys.BarNoAppearance)
-            : Words.Get(TextKeys.BarAppearance, System.IO.Path.GetFileName(fullPath));
+            : Words.Get(TextKeys.BarAppearance, Path.GetFileName(fullPath));
         ToolTip.SetTip(appearanceButton, fullPath ?? Words.Get(TextKeys.BarAppearanceTip));
         design = null;
         RequestPicture();

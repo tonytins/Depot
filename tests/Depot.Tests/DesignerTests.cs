@@ -153,7 +153,7 @@ public sealed class DesignerTests : IDisposable
 
         // Kept, under Other, since the file has it, but not offered as something Hudini reads.
         Assert.Contains("subtitle", window.Inspector.Fields.Keys);
-        Assert.DoesNotContain(Depot.Interface.HudiniSubset.For("Window"), info => info.Name == "subtitle");
+        Assert.DoesNotContain(Interface.HudiniSubset.For("Window"), info => info.Name == "subtitle");
     });
 
     [Fact]

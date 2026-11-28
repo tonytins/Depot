@@ -12,7 +12,7 @@ public static class Words
     public const int TableId = 100;
 
     /// <summary>Where the table is, beside the app.</summary>
-    public static string TablePath { get; } = System.IO.Path.Combine(AppContext.BaseDirectory, "uitext", "english.dir", "_100_depot.cst");
+    public static string TablePath { get; } = Path.Combine(AppContext.BaseDirectory, "uitext", "english.dir", "_100_depot.cst");
 
     // Read once, the first time a word is asked for. A table that can't be read leaves every word showing its key,
     // so the gap is plain to see rather than blank, and Depot still runs.
